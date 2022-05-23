@@ -1,0 +1,103 @@
+.wrapper_auth {
+    padding: 50px 80px 50px 80px;
+    width: 100%;
+    height: 100vh;
+
+    background-image: url("../../assets/architecture-sky-building-skyscraper-new-york-downtown-line-tower-landmark-facade-tower-block-spire-steeple-shape-140154.jpeg");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+
+    box-sizing: border-box;
+}
+
+.block {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+	background: rgba(255, 255, 255, .1);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+    border-radius: 34px;
+}
+
+.block_logo {
+    display: flex;
+    font-weight: 700;
+    font-family: Bebas Neue;
+    color: #2196F3;
+    font-size: 80px;
+}
+.plus {
+    color: red;
+}
+
+.block_auth {
+    padding: 45px 40px;
+    width: 455px;
+    height: 516px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    border-radius: 34px;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.block_title {
+    margin-bottom: 5px;
+    font-size: 48px;
+}
+.block_subtitle {
+    margin-bottom: 31px;
+    font-size: 20px;
+}
+
+.block_inputs {
+    margin-bottom: 57px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input {
+    padding-left: 18px;
+    height: 50px;
+
+    font-size: 18px;
+    border: 1px solid #C4C4C4;
+    border-radius: 15px;
+}
+
+.block_btn {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 74px;
+
+    color: #fff;
+    font-weight: 700;
+    background-color: #2196F3;
+    border-radius: 25px;
+}
+
+.block_sub {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.block_subbtn {
+    display: flex;
+    color: #555E63;
+}
+
+.block_link {
+    margin-left: 5px;
+    color: #2196F3;
+    cursor: pointer;
+}

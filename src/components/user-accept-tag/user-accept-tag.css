@@ -1,0 +1,19 @@
+.tag {
+    padding: 0px 3px;
+    width: 117px;
+    height: 23px;
+    display: flex;
+
+    border: 1.5px solid #2097F5;
+    border-radius: 50px;
+    box-sizing: border-box;
+}
+
+.icon-done {
+    color: #2097F5;
+    font-size: 19px;
+}
+
+.tag-accept {
+    font-size: 13px;
+}
