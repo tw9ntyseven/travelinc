@@ -5,6 +5,9 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import Auth from '../auth/auth';
 import Users from '../users/users';
+import TodoApp from '../pagino.js';
+import AppPagino from '../pagino.js';
+
 
 
 const CustomTabList = ({ children, ...otherProps }) => (
@@ -43,7 +46,7 @@ const Main = () => {
                 <Users />
               </TabPanel>
               <TabPanel>
-                <h2>Заказы</h2>
+              <AppPagino />
               </TabPanel>
               <TabPanel>
                 <h2>Финансы</h2>
