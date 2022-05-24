@@ -55,5 +55,9 @@
 }
 
 .table-body_item {
+    font-size: 0.9rem;
     height: 3rem;
+}
+.no-data {
+    color: #ABABAB;
 }
