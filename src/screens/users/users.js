@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import './users.css'
 import '../../components/table/table.css'
 import usePagination from "../../hooks/usePagination";
+import Loader from '../../components/loader/loader';
 const axios = require('axios').default;
 
 // Function for sorting ASC and DESC
@@ -53,7 +54,7 @@ const Users = () => {
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
-                    type: 'get_dashboard_info',
+                    type: 'get_dashboard_users',
                     per_page: 30,
                     page: 1
                 },
@@ -82,11 +83,13 @@ const Users = () => {
         }, 1000);
     }, []);
 
-    // let people = result; const [people, setPeople] = useState(res);
+    // let people = result; 
 
     console.log(result, "GET DATA");
 
-    // const {users, requestSort, sortConfig} = useSortableData(people);
+    // let newResult = {...result};
+    const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const {
@@ -103,6 +106,16 @@ const Users = () => {
             .keys(result)
             .length
     });
+
+    const GetKey = () => {
+        Object
+        .keys(result)
+        .slice(firstContentIndex, lastContentIndex)
+        .map((item, index) => {
+            return result[item].login;
+        })
+    }
+
     return (
         <div className='users_wrapper'>
             <div className='users'>
@@ -127,7 +140,7 @@ const Users = () => {
                 </div>
             </div>
         {loading ? (
-        <h2>Loading...</h2>
+        <Loader />
       ) : error ? (
         <h2>Error fetching users</h2>
       ) : (
@@ -138,63 +151,72 @@ const Users = () => {
                             style={{
                             paddingLeft: '10px'
                         }}>
-                            <button type="button" // onClick={() => requestSort('login')}}
+                            <button type="button" 
+                            onClick={() => console.log(GetKey(), "REQUEST SORT")}
                          className='table_title'>
                                 Логин
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('userName')}}
+                            <button type="button"  
+                            onClick={() => requestSort('first_name')}
                          className='table_title'>
                                 Имя пользователя
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('phone')}}
+                            <button type="button"  
+                            onClick={() => requestSort('phone')}
                          className='table_title'>
                                 Телефон
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('status')}}
+                            <button type="button"  
+                            onClick={() => requestSort('confirmed')}
                          className='table_title'>
                                 Статус
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('orders')}}
+                            <button type="button" 
+                            onClick={() => requestSort('orders_count')}
                          className='table_title'>
                                 Заказы
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('booking')}}
+                            <button type="button"  
+                            onClick={() => requestSort('bookings_count')}
                          className='table_title'>
                                 Брони
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('activeOrders')}}
+                            <button type="button"  
+                            onClick={() => requestSort('active_listings')}
                          className='table_title'>
                                 Акт. объ.
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('city')}}
+                            <button type="button" 
+                            onClick={() => requestSort('city')}
                          className='table_title'>
                                 Город
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" // onClick={() => requestSort('rating')}}
+                            <button type="button" 
+                            onClick={() => requestSort('rating')}
                          className='table_title'>
                                 Рейтинг
                                 <span class="material-symbols-outlined">arrow_drop_down</span>

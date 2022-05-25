@@ -83,6 +83,8 @@
     outline: none;
 }
 
+
+/* --- PAGINATION --- */
 .pagination {
     width: 100%;
     display: flex;
@@ -108,9 +110,11 @@
     font-weight: 500;
     color: #555E63;
     background-color: #fff;
+    border: none;
     border: 1px solid #c4c4c4;
     border-radius: 8px;
     cursor: pointer;
+    box-sizing: border-box;
 }
 .pagination_page:hover {
     box-shadow: inset 0px 0px 20px 10px rgba(0, 0, 0, 0.1);

@@ -22,6 +22,7 @@
 .header-block_logo {
     margin-right: 5.0rem;
     font-size: 34px !important;
+    font-weight: 400 !important;
     cursor: pointer;
 }
 
