@@ -1,49 +1,48 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useMemo} from 'react'
 import './users.css'
 import '../../components/table/table.css'
 import usePagination from "../../hooks/usePagination";
 import Loader from '../../components/loader/loader';
+import Filter from '../../components/filter/filter';
 const axios = require('axios').default;
 
 // Function for sorting ASC and DESC
 const useSortableData = (items, config = null) => {
-    const [sortConfig,
-        setSortConfig] = React.useState(config);
-
+    const [sortConfig, setSortConfig] = React.useState(config);
+  
     const sortedItems = React.useMemo(() => {
-        let sortableItems = [...items];
-        if (sortConfig !== null) {
-            sortableItems.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending'
-                        ? -1
-                        : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending'
-                        ? 1
-                        : -1;
-                }
-                return 0;
-            });
-        }
-        return sortableItems;
+      let sortableItems = [...items];
+      if (sortConfig !== null) {
+        sortableItems.sort((a, b) => {
+          if (a[sortConfig.key] < b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? -1 : 1;
+          }
+          if (a[sortConfig.key] > b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+      return sortableItems;
     }, [items, sortConfig]);
-
+  
     const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({key, direction});
+      let direction = 'ascending';
+      if (
+        sortConfig &&
+        sortConfig.key === key &&
+        sortConfig.direction === 'ascending'
+      ) {
+        direction = 'descending';
+      }
+      setSortConfig({ key, direction });
     };
-
-    return {items: sortedItems, requestSort, sortConfig};
-};
+  
+    return { items: sortedItems, requestSort, sortConfig };
+  };
 
 const Users = () => {
-    const [result,
-        setResult] = useState('');
+    const [result, setResult] = useState('');
 
     // Function for timeout
     const fetchLongRequest = async() => {
@@ -83,13 +82,18 @@ const Users = () => {
         }, 1000);
     }, []);
 
-    // let people = result; 
-
-    console.log(result, "GET DATA");
-
-    // let newResult = {...result};
     const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
+    // let doublePrices = Object.fromEntries(
+    //     Object.entries(prices).map(([key, value]) => [key, value * 2])
+    //   );
+    //   for (let value of Object.values(result)) {
+    //     console.log(value.city); // John, затем 30
+    //   }
+    //   console.log(cities, "CITIES");
+    // let city = Object.entries(result);
+    // console.log(city, "RESSSE");
 
+    const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const {
@@ -107,15 +111,6 @@ const Users = () => {
             .length
     });
 
-    const GetKey = () => {
-        Object
-        .keys(result)
-        .slice(firstContentIndex, lastContentIndex)
-        .map((item, index) => {
-            return result[item].login;
-        })
-    }
-
     return (
         <div className='users_wrapper'>
             <div className='users'>
@@ -125,16 +120,19 @@ const Users = () => {
                             style={{
                             marginRight: '7px'
                         }}
-                            class="material-symbols-outlined">group</span>Пользователи</div>
+                            className="material-symbols-outlined">group</span>Пользователи</div>
                     <div className='flex'>
-                        <div className='users_filter'>
+                    <div className='flex-column'>
+                        <div onClick={e => setShowFilter(!showFilter)} className='users_filter'>
                             Фильтры
                             <div className='filter_counter'>0</div>
-                            <span class="material-symbols-outlined">tune</span>
+                            <span className="material-symbols-outlined">tune</span>
+                        </div>
+                        <div>{showFilter ? <Filter /> : null}</div>
                         </div>
                         <div className='table_input input'>
                             <input className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
-                            <span class="material-symbols-outlined">search</span>
+                            <span className="material-symbols-outlined">search</span>
                         </div>
                     </div>
                 </div>
@@ -152,10 +150,10 @@ const Users = () => {
                             paddingLeft: '10px'
                         }}>
                             <button type="button" 
-                            onClick={() => console.log(GetKey(), "REQUEST SORT")}
+                            onClick={() => console.log("REQUEST SORT")}
                          className='table_title'>
                                 Логин
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -163,7 +161,7 @@ const Users = () => {
                             onClick={() => requestSort('first_name')}
                          className='table_title'>
                                 Имя пользователя
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -171,7 +169,7 @@ const Users = () => {
                             onClick={() => requestSort('phone')}
                          className='table_title'>
                                 Телефон
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -179,7 +177,7 @@ const Users = () => {
                             onClick={() => requestSort('confirmed')}
                          className='table_title'>
                                 Статус
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -187,7 +185,7 @@ const Users = () => {
                             onClick={() => requestSort('orders_count')}
                          className='table_title'>
                                 Заказы
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -195,7 +193,7 @@ const Users = () => {
                             onClick={() => requestSort('bookings_count')}
                          className='table_title'>
                                 Брони
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -203,7 +201,7 @@ const Users = () => {
                             onClick={() => requestSort('active_listings')}
                          className='table_title'>
                                 Акт. объ.
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -211,7 +209,7 @@ const Users = () => {
                             onClick={() => requestSort('city')}
                          className='table_title'>
                                 Город
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
@@ -219,7 +217,7 @@ const Users = () => {
                             onClick={() => requestSort('rating')}
                          className='table_title'>
                                 Рейтинг
-                                <span class="material-symbols-outlined">arrow_drop_down</span>
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                     </tr>
@@ -240,7 +238,7 @@ const Users = () => {
                                     <td className="table-body_item">
                                         {result[item].avatar
                                             ? <img className='table-body_img' src={result[item].avatar}/>
-                                            : <span class="material-symbols-outlined no-img_table">account_circle_full</span>}
+                                            : <span className="material-symbols-outlined no-img_table">account_circle_full</span>}
                                         {result[item].first_name
                                             ? <span>
                                                     {result[item].first_name}&#160;
@@ -265,17 +263,17 @@ const Users = () => {
                                                         style={{
                                                         color: '#4CBB17'
                                                     }}
-                                                        class="material-symbols-outlined">check_circle</span>;
+                                                        className="material-symbols-outlined">check_circle</span>;
                                                 case false:
                                                     return <span
                                                         style={{
                                                         color: '#F05050'
                                                     }}
-                                                        class="material-symbols-outlined">cancel</span>;
+                                                        className="material-symbols-outlined">cancel</span>;
                                                     {/* case 'waitingConfirmed':
-                return <span style={{color: '#FFBF00'}} class="material-symbols-outlined">timelapse</span>;
+                return <span style={{color: '#FFBF00'}} className="material-symbols-outlined">timelapse</span>;
               case 'blocked':
-                return <span style={{color: '#666669'}} class="material-symbols-outlined">lock</span>; */
+                return <span style={{color: '#666669'}} className="material-symbols-outlined">lock</span>; */
                                                     }
                                             }
                                         })()}
@@ -287,9 +285,9 @@ const Users = () => {
                                         ? <td className="table-body_item">{result[item].city}</td>
                                         : <td className="table-body_item no-data">Город не указан</td>}
                                         {result[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} class="material-symbols-outlined">star</span>{result[item].rating.toFixed(1)}</td> :
+                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{result[item].rating.toFixed(1)}</td> :
                                          <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} class="material-symbols-outlined">star</span>--.--</td>}
+                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>--.--</td>}
                                 </tr>
                             )
                         })}
@@ -301,7 +299,7 @@ const Users = () => {
                     {page} из {totalPages}
                 </p>
                 <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
-                <span style={{fontSize: '22px'}} class="material-symbols-outlined">arrow_back_ios_new</span>
+                <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_back_ios_new</span>
                 </button>
                 {[...Array(totalPages).keys()].map((el) => (
                     <button
@@ -316,7 +314,7 @@ const Users = () => {
                 <button
                     onClick={nextPage}
                     className={`pagination_page pagination_page--next ${page === totalPages && "disabled"}`}>
-                    <span style={{fontSize: '22px'}} class="material-symbols-outlined">arrow_forward_ios</span>
+                    <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
             </div>
 
