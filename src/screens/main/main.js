@@ -7,6 +7,7 @@ import Auth from '../auth/auth';
 import Users from '../users/users';
 import TodoApp from '../pagino.js';
 import AppPagino from '../pagino.js';
+import Dashboard from '../dashboard/dashboard';
 
 
 
@@ -40,7 +41,7 @@ const Main = () => {
               </CustomTabList>
 
               <TabPanel>
-                <h2>Дэшбоард</h2>
+                <Dashboard />
               </TabPanel>
               <TabPanel>
                 <Users />

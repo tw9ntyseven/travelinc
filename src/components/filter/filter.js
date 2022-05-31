@@ -107,6 +107,9 @@ const [res, setRes] = useState([]);
                 <Checkbox className="filter_checkbox-column-item" label="С бронями" />
             </div>
             </div>
+            <div className='filter_button-block'>
+                <div className='filter_button-block-btn'>Применить</div>
+            </div>
         </div>
     );
 }

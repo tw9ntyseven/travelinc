@@ -20,3 +20,16 @@
     margin-bottom: 20px !important;
     /* background-color: #2097F5 !important; */
 }
+.filter_button-block {
+    display: flex;
+    justify-content: end;
+    margin: 0px 0px 10px 0;
+}
+.filter_button-block-btn  {
+    padding: 9px 15px;
+    background-color: #2097F5;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+}
