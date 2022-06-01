@@ -54,8 +54,12 @@ const Users = () => {
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_users',
-                    per_page: 30,
-                    page: 1
+                    per_page: 100,
+                    page: 1,
+                },
+                filters: {
+                    region: "Краснодар",
+                    status: "on_validation"
                 },
                     headers: {
                         "Content-Type": "multipart/form-data"
@@ -65,6 +69,7 @@ const Users = () => {
                     //handle success
                     setLoading(false);
                     setResult(response.data.users);
+                    console.log(response.data, "USERS");
                 })
                 .catch(function (response) {
                     //handle error
@@ -238,7 +243,7 @@ const Users = () => {
                                     <td className="table-body_item">
                                         {result[item].avatar
                                             ? <img className='table-body_img' src={result[item].avatar}/>
-                                            : <span className="material-symbols-outlined no-img_table">account_circle_full</span>}
+                                            : <span className="material-symbols-outlined no-img_table">account_circle</span>}
                                         {result[item].first_name
                                             ? <span>
                                                     {result[item].first_name}&#160;

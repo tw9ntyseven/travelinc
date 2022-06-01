@@ -84,3 +84,25 @@ details {
     font-weight: 600;
     font-size: 16px;
 }
+.dashboard_title {
+    padding: 0.3em 1.5em 0.3em 0.6em;
+    font-size: 1.4em;
+    color: #000;
+    font-weight: 700;
+}
+.dashboard_priceblock {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    padding: 40px;
+    width: 100%;
+    display: grid;
+    justify-items: stretch;
+    grid-template-columns: 40% 50%;
+    gap: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+/* .dashboard_priceblock-piechart {
+
+} */
