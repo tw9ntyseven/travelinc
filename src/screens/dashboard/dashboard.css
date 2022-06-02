@@ -30,9 +30,6 @@ summary:before {
 details[open] > summary:before {
     transform: rotateZ(90deg);
 }
-summary ~ * {
-    padding: 0 1em;
-}
 details[open] summary ~ * {
     animation: sweep 0.5s ease-in-out;
 }
@@ -54,12 +51,12 @@ details {
 }
 
 .dashboard_block {
-    width: 100% auto;
+    /*width: 100% auto;*/
     margin: 20px 0;
     display: grid;
     /* justify-content: start; */
     justify-items: stretch;
-    grid-template-columns: 16% 16% 16% 16% 16% 16%;
+    grid-template-columns: 16.6% 16.6% 16.6% 16.6% 16.6% 16.6%;
     gap: 15px;
 }
 .dashboard_block-card {
@@ -94,15 +91,48 @@ details {
     margin-top: 20px;
     margin-bottom: 50px;
     padding: 40px;
-    width: 100%;
-    display: grid;
-    justify-items: stretch;
-    grid-template-columns: 40% 50%;
-    gap: 15px;
+    width: 100% !important;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /*display: grid;*/
+    /*justify-items: stretch;*/
+    /*grid-template-rows: 20% 50%;*/
+    /*gap: 15px;*/
     background-color: #fff;
     border-radius: 8px;
     box-sizing: border-box;
 }
-/* .dashboard_priceblock-piechart {
+.dashboard_priceblock-tabs {
+    width: 536px;
+    /*height: 40px;*/
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 50px;
+    border: 1px solid #c4c4c4;
+}
+button {
+    padding: 12px 24px;
 
-} */
+    background-color: inherit;
+    color: #2097F5;
+    font-weight: 600;
+    border: 0;
+    border-radius: 50px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+.dashboard_priceblock-tabs-item--active {
+    background-color: #2097F5;
+    color: #ffffff;
+}
+.dashboard_priceblock-charts {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.dashboard_priceblock-linechart {
+    width: 100%;
+}
