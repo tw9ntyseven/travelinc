@@ -1,51 +1,15 @@
 import React, {useState, useEffect} from 'react'
-import './users.css'
-import '../../components/table/table.css'
-import usePagination from "../../hooks/usePagination";
+import './orders.css'
 import Loader from '../../components/loader/loader';
 import Filter from '../../components/filter/filter';
+import usePagination from "../../hooks/usePagination";
 const axios = require('axios').default;
 
-// Function for sorting ASC and DESC
-const useSortableData = (items, config = null) => {
-    const [sortConfig, setSortConfig] = React.useState(config);
-  
-    const sortedItems = React.useMemo(() => {
-      let sortableItems = [...items];
-      if (sortConfig !== null) {
-        sortableItems.sort((a, b) => {
-          if (a[sortConfig.key] < b[sortConfig.key]) {
-            return sortConfig.direction === 'ascending' ? -1 : 1;
-          }
-          if (a[sortConfig.key] > b[sortConfig.key]) {
-            return sortConfig.direction === 'ascending' ? 1 : -1;
-          }
-          return 0;
-        });
-      }
-      return sortableItems;
-    }, [items, sortConfig]);
-  
-    const requestSort = (key) => {
-      let direction = 'ascending';
-      if (
-        sortConfig &&
-        sortConfig.key === key &&
-        sortConfig.direction === 'ascending'
-      ) {
-        direction = 'descending';
-      }
-      setSortConfig({ key, direction });
-    };
-  
-    return { items: sortedItems, requestSort, sortConfig };
-  };
-
-const Users = () => {
+const Orders = () => {
     const [result, setResult] = useState('');
 
     // Function for timeout
-    const fetchLongRequest = async() => {
+    const getOrders = async() => {
         const waitTime = 5000;
         setTimeout(() => console.log("Request taking a long time"), waitTime);
         try {
@@ -53,13 +17,18 @@ const Users = () => {
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
-                    type: 'get_dashboard_users',
+                    type: 'get_dashboard_orders',
                     per_page: 100,
                     page: 1,
-                },
-                filters: {
-                    region: "Краснодар",
-                    status: "on_validation"
+                    // filters: {
+                    //     region: "151",
+                    //     status: "paid",
+                    //     date: {
+                    //         "start_date": "2022-05-22",
+                    //         "end_date": "2022-05-27"
+                    //     }
+                    // }
+                
                 },
                     headers: {
                         "Content-Type": "multipart/form-data"
@@ -68,8 +37,8 @@ const Users = () => {
                 .then(function (response) {
                     //handle success
                     setLoading(false);
-                    setResult(response.data.users);
-                    console.log(response.data, "USERS");
+                    setResult(response.data.post);
+                    console.log(response.data.post, "ORDERS");
                 })
                 .catch(function (response) {
                     //handle error
@@ -83,12 +52,11 @@ const Users = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            fetchLongRequest();
+            getOrders();
         }, 1000);
     }, []);
 
-    const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
-
+    console.log(result, "RESULT");
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -101,7 +69,7 @@ const Users = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: 10,
+        contentPerPage: 25,
         count: Object
             .keys(result)
             .length
@@ -116,7 +84,7 @@ const Users = () => {
                             style={{
                             marginRight: '7px'
                         }}
-                            className="material-symbols-outlined">group</span>Пользователи</div>
+                            className="material-symbols-outlined">file_copy</span>Заказы</div>
                     <div className='flex'>
                     <div className='flex-column'>
                         <div onClick={e => setShowFilter(!showFilter)} className='users_filter'>
@@ -136,7 +104,7 @@ const Users = () => {
         {loading ? (
         <Loader />
       ) : error ? (
-        <h2>Error fetching users</h2>
+        <h2>Error fetching orders</h2>
       ) : (
             <table className="table">
                 <thead className="table_head">
@@ -146,73 +114,43 @@ const Users = () => {
                             paddingLeft: '10px'
                         }}>
                             <button type="button" 
-                            onClick={() => console.log("REQUEST SORT")}
                          className='table_title'>
-                                Логин
+                                Название
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                            onClick={() => requestSort('first_name')}
-                         className='table_title'>
-                                Имя пользователя
-                                <span className="material-symbols-outlined">arrow_drop_down</span>
-                            </button>
-                        </th>
-                        <th>
-                            <button type="button"  
-                            onClick={() => requestSort('phone')}
-                         className='table_title'>
-                                Телефон
-                                <span className="material-symbols-outlined">arrow_drop_down</span>
-                            </button>
-                        </th>
-                        <th>
-                            <button type="button"  
-                            onClick={() => requestSort('confirmed')}
                          className='table_title'>
                                 Статус
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button" 
-                            onClick={() => requestSort('orders_count')}
+                            <button type="button"  
                          className='table_title'>
-                                Заказы
+                                Арендатор
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                            onClick={() => requestSort('bookings_count')}
                          className='table_title'>
-                                Брони
-                                <span className="material-symbols-outlined">arrow_drop_down</span>
-                            </button>
-                        </th>
-                        <th>
-                            <button type="button"  
-                            onClick={() => requestSort('active_listings')}
-                         className='table_title'>
-                                Акт. объ.
+                                Арендодатель
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button" 
-                            onClick={() => requestSort('city')}
+                         className='table_title'>
+                                Телефон арендодателя
+                                <span className="material-symbols-outlined">arrow_drop_down</span>
+                            </button>
+                        </th>
+                        <th>
+                            <button type="button"  
                          className='table_title'>
                                 Город
-                                <span className="material-symbols-outlined">arrow_drop_down</span>
-                            </button>
-                        </th>
-                        <th>
-                            <button type="button" 
-                            onClick={() => requestSort('rating')}
-                         className='table_title'>
-                                Рейтинг
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
@@ -228,62 +166,57 @@ const Users = () => {
                                 <tr key={index} className="table_body">
                                     <td
                                         style={{
+                                        width: '30%',
                                         paddingLeft: '10px'
                                     }}
-                                        className="table-body_item">{result[item].login}</td>
+                                        className="table-body_item">
+                                            {result[item].title}
+                                        </td>
+
+                                    <td
+                                        className="table-body_item">
+                                        {(() => {
+                                            switch (result[item].status) {
+                                                case "paid":
+                                                    return <div className="table_body_item-status table_body_item-status--paid">Оплачено</div>;
+                                                case "expired":
+                                                    return <div className="table_body_item-status table_body_item-status--expired">Просроченный</div>;
+                                                case "owner_reservations":
+                                                    return <div className="table_body_item-status table_body_item-status--owner-reservations">Бронь владельца</div>;
+                                                case "waiting":
+                                                    return <div className="table_body_item-status table_body_item-status--waiting">Ждет оплаты</div>;
+                                                case "cancelled":
+                                                    return <div className="table_body_item-status table_body_item-status--cancelled">Отменен</div>;             
+                                            }
+                                        })()}
+                                    </td>
+                                    <td
+                                        className="table-body_item">
+                                        <div className="">{result[item].booking_author_login}</div></td>
                                     <td className="table-body_item">
-                                        {result[item].avatar
-                                            ? <img className='table-body_img' src={result[item].avatar}/>
+                                        {result[item].booking_author_avatar
+                                            ? <img className='table-body_img' src={result[item].booking_author_avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
-                                        {result[item].first_name
+                                        {result[item].booking_author_first_name
                                             ? <span>
-                                                    {result[item].first_name}&#160;
-                                                    {result[item].last_name}
+                                                    {result[item].booking_author_first_name}&#160;
+                                                    {result[item].booking_author_last_name}
                                                 </span>
                                             : <span className='no-data'>
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {result[item].phone
-                                        ? <td className="table-body_item">{result[item].phone}</td>
+                                    {result[item].booking_author_phone
+                                        ? <td className="table-body_item">{result[item].booking_author_phone}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
-                                    <td
-                                        style={{
-                                        textAlign: 'center'
-                                    }}
-                                        className="table-body_item">
-                                        {(() => {
-                                            switch (result[item].confirmed) {
-                                                case true:
-                                                    return <span
-                                                        style={{
-                                                        color: '#4CBB17'
-                                                    }}
-                                                        className="material-symbols-outlined">check_circle</span>;
-                                                case false:
-                                                    return <span
-                                                        style={{
-                                                        color: '#F05050'
-                                                    }}
-                                                        className="material-symbols-outlined">cancel</span>;
-                                                    {/* case 'waitingConfirmed':
-                return <span style={{color: '#FFBF00'}} className="material-symbols-outlined">timelapse</span>;
-              case 'blocked':
-                return <span style={{color: '#666669'}} className="material-symbols-outlined">lock</span>; */
-                                                    }
-                                            }
-                                        })()}
-                                    </td>
-                                    <td className="table-body_item">{result[item].orders_count}</td>
-                                    <td className="table-body_item">{result[item].bookings_count}</td>
-                                    <td className="table-body_item">{result[item].active_listings}</td>
-                                    {result[item].city
-                                        ? <td className="table-body_item">{result[item].city}</td>
-                                        : <td className="table-body_item no-data">Город не указан</td>}
-                                        {result[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{result[item].rating.toFixed(1)}</td> :
-                                         <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>--.--</td>}
+                                   
+                                    {result[item].region
+                                        ? <td style={{
+                                        paddingRight: '20px'
+                                    }} className="table-body_item">{result[item].region}</td>
+                                        : <td style={{
+                                        paddingRight: '20px'
+                                    }} className="table-body_item no-data">Город не указан</td>}
                                 </tr>
                             )
                         })}
@@ -319,4 +252,4 @@ const Users = () => {
 
 }
 
-export default Users;
+export default Orders;

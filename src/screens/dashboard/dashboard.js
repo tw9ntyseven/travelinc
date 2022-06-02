@@ -70,10 +70,10 @@ const DashboardCard = ({items}) => {
             {items.map((item, index) => (
                 <div key={index} className='dashboard_block-card'>
                     <img src={require(`../../assets/dashboard-icons/${item.icon}.svg`)}/>
-                    <div className='dashboard_block-card-count flex'>{item.new
-                            ? <div>+</div>
-                            : null}{item.count}</div>
-                    <div className='dashboard_block-card-description'>{item.description}</div>
+                        <div className='dashboard_block-card-count flex'>{item.new
+                                ? <div>+</div>
+                                : null}{item.count}</div>
+                        <div className='dashboard_block-card-description'>{item.description}</div>
                 </div>
             ))}
         </div>

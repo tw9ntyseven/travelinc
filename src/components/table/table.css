@@ -1,9 +1,9 @@
 .table {
     width: 100%;
-    border-spacing: 0px;
     border-collapse: collapse;
     border-radius: 0 0 8px 8px;
     background-color: #fff;
+    /* border-spacing: 10px !important; */
 }
 
 .table_head {
@@ -32,7 +32,7 @@
     align-items: center;
 
     color: #555E63;
-    font-size: 1.2rem;
+    font-size: 1rem;
 
     border: none;
     background-color: inherit;
@@ -44,7 +44,10 @@
 .table_title:hover {
     color: #2097F5;
 }
-
+.table-body_item--middle {
+    vertical-align: middle !important;
+    text-align: center;
+}
 .table_body {
     border-bottom: 1px solid #c4c4c4;
 }
