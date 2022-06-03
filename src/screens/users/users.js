@@ -6,6 +6,8 @@ import Loader from '../../components/loader/loader';
 import Filter from '../../components/filter/filter';
 const axios = require('axios').default;
 
+
+
 // Function for sorting ASC and DESC
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = React.useState(config);
@@ -41,19 +43,20 @@ const useSortableData = (items, config = null) => {
     return { items: sortedItems, requestSort, sortConfig };
   };
 
+
+
+
 const Users = () => {
     const [result, setResult] = useState('');
+    const [resultStat, setResultStat] = useState()
 
     // Function for timeout
-    const fetchLongRequest = async() => {
-        const waitTime = 5000;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
+    const getUsers = async() => {
             await axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
-                    type: 'get_dashboard_users',
+                    type: 'get_dashboard_users_list',
                     per_page: 100,
                     page: 1,
                 },
@@ -69,22 +72,40 @@ const Users = () => {
                     //handle success
                     setLoading(false);
                     setResult(response.data.users);
-                    console.log(response.data, "USERS");
+                    console.log(response, "USERS");
                 })
                 .catch(function (response) {
                     //handle error
                     setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
+    };
+
+    const getUserStats = async() => {
+            await axios({
+                method: "POST",
+                url: "https://easytake.org/custom.php",
+                data: {
+                    type: 'get_dashboard_users_stats',
+                },
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+                })
+                .then(function (response) {
+                    setLoading(false);
+                    setResultStat(response);
+                    console.log(response, "USERS STATS");
+                })
+                .catch(function (response) {
+                    setError(true);
+                    console.log(response.err);
+                });
     };
 
     useEffect(() => {
-        setTimeout(() => {
-            fetchLongRequest();
-        }, 1000);
+            getUsers();
+            getUserStats();
     }, []);
 
     const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));

@@ -64,3 +64,21 @@
 .no-data {
     color: #ABABAB;
 }
+
+.table_cards {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+.table_cards-item {
+    margin-right: 10px;
+    width: 240px;
+    height: 110px;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+
+    background-color: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;
+}

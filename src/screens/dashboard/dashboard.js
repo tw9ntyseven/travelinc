@@ -80,6 +80,28 @@ const DashboardCard = ({items}) => {
     );
 }
 
+    // FUNCTION FOR NUMBERS SEPARATE
+   export const thousandSeparator = function(str) {
+        var parts = (str + '').split('.'),
+            main = parts[0],
+            len = main.length,
+            output = '',
+            i = len - 1;
+        
+        while(i >= 0) {
+            output = main.charAt(i) + output;
+            if ((len - i) % 3 === 0 && i > 0) {
+                output = ' ' + output;
+            }
+            --i;
+        }
+    
+        if (parts.length > 1) {
+            output += '.' + parts[1];
+        }
+        return output;
+    };
+
 const Dashboard = () => {
     const [users,
         setUsers] = useState()
@@ -100,7 +122,6 @@ const Dashboard = () => {
         setLoading] = useState(true);
 
     const getDashboard = async() => {
-        const waitTime = 5000;
 
         // TIME MANAGE
         let today = new Date();
@@ -119,8 +140,7 @@ const Dashboard = () => {
         var spanFirstDay = yyyy + '-' + fmm + '-' + fdd;
         var timeSpanToday = `${spanToday} - ${spanToday}`;
         var timeSpanFirstOfTheMonth = `${spanFirstDay} - ${spanToday}`;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
+
             await axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -148,16 +168,11 @@ const Dashboard = () => {
                     setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
     };
 
     useEffect(() => {
-        setTimeout(() => {
             getDashboard();
             // getDashboardToday();
-        }, 1000);
     }, []);
 
     // DATA FOR LINECHART
@@ -237,28 +252,6 @@ const Dashboard = () => {
         borderWidth: 1,
         },
     ],
-    };
-
-    // FUNCTION FOR NUMBERS SEPARATE
-    var thousandSeparator = function(str) {
-        var parts = (str + '').split('.'),
-            main = parts[0],
-            len = main.length,
-            output = '',
-            i = len - 1;
-        
-        while(i >= 0) {
-            output = main.charAt(i) + output;
-            if ((len - i) % 3 === 0 && i > 0) {
-                output = ' ' + output;
-            }
-            --i;
-        }
-    
-        if (parts.length > 1) {
-            output += '.' + parts[1];
-        }
-        return output;
     };
 
 

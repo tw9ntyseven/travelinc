@@ -9,6 +9,7 @@ import TodoApp from '../pagino.js';
 import AppPagino from '../pagino.js';
 import Dashboard from '../dashboard/dashboard';
 import Orders from '../orders/orders';
+import Finances from '../finances/finances';
 
 
 
@@ -51,7 +52,7 @@ const Main = () => {
                 <Orders />
               </TabPanel>
               <TabPanel>
-                <h2>Финансы</h2>
+              <Finances />
               </TabPanel>
               <TabPanel>
                 <h2>Профиль</h2>
