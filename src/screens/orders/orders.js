@@ -1,12 +1,15 @@
 import React, {useState, useEffect} from 'react'
 import './orders.css'
 import Loader from '../../components/loader/loader';
-import Filter from '../../components/filter/filter';
+import Filter, { FilterOrders } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
+import { thousandSeparator } from '../dashboard/dashboard';
+import { TableCard } from '../finances/finances';
 const axios = require('axios').default;
 
 const Orders = () => {
     const [result, setResult] = useState('');
+    const [resultStat, setResultStat] = useState('')
 
     // Function for timeout
     const getOrders = async() => {
@@ -17,7 +20,7 @@ const Orders = () => {
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
-                    type: 'get_dashboard_orders',
+                    type: 'get_dashboard_orders_list',
                     per_page: 100,
                     page: 1,
                     // filters: {
@@ -50,10 +53,33 @@ const Orders = () => {
         }
     };
 
+    const getOrdersStats = async() => {
+        await axios({
+            method: "POST",
+            url: "https://easytake.org/custom.php",
+            data: {
+                type: 'get_dashboard_orders_stat',
+            },
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+            })
+            .then(function (response) {
+                setLoading(false);
+                setResultStat(response.data);
+                console.log(response, "ORDERS STATS");
+            })
+            .catch(function (response) {
+                setError(true);
+                console.log(response.err);
+            });
+};
+
     useEffect(() => {
-        setTimeout(() => {
-            getOrders();
-        }, 1000);
+        setTimeout(async() => {
+            await getOrders();
+            // await getOrdersStats();
+        }, 0);
     }, []);
 
     console.log(result, "RESULT");
@@ -77,6 +103,39 @@ const Orders = () => {
 
     return (
         <div className='users_wrapper'>
+    {loading ? (
+        <Loader />
+      ) : error ? (
+        <h2>Error fetching orders</h2>
+      ) : (
+        <>
+        {/* <TableCard items={[
+                {
+                    count: thousandSeparator(resultStat.total_users),
+                    description: 'Активных пользователей',
+                    icon: 'Profile'
+                },
+                {
+                    count: thousandSeparator(resultStat.not_confirmed_users),
+                    description: 'Не подтвержденных пользователей',
+                    icon: 'Close'
+                },
+                {
+                    count: thousandSeparator(resultStat.confirmed_users),
+                    description: 'Подтвержденные пользователи',
+                    icon: 'Tick'
+                },
+                {
+                    count: thousandSeparator(resultStat.on_validation),
+                    description: 'Заявка на авторизацию',
+                    icon: 'Clock'
+                },
+                {
+                    count: thousandSeparator(resultStat.blocked),
+                    description: 'Заблокированных пользователей',
+                    icon: 'blocked-users'
+                },
+        ]} /> */}
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>
@@ -92,7 +151,7 @@ const Orders = () => {
                             <div className='filter_counter'>0</div>
                             <span className="material-symbols-outlined">tune</span>
                         </div>
-                        <div>{showFilter ? <Filter /> : null}</div>
+                        <div>{showFilter ? <FilterOrders /> : null}</div>
                         </div>
                         <div className='table_input input'>
                             <input className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
@@ -101,11 +160,6 @@ const Orders = () => {
                     </div>
                 </div>
             </div>
-        {loading ? (
-        <Loader />
-      ) : error ? (
-        <h2>Error fetching orders</h2>
-      ) : (
             <table className="table">
                 <thead className="table_head">
                     <tr>
@@ -222,7 +276,6 @@ const Orders = () => {
                         })}
                 </tbody>
             </table>
- )}
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}
@@ -246,7 +299,8 @@ const Orders = () => {
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
             </div>
-
+            </>
+      )}
         </div>
     );
 

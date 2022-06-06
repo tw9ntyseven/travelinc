@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import './finances.css'
 import Loader from '../../components/loader/loader';
-import Filter from '../../components/filter/filter';
+import Filter, { FilterFinances } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 const axios = require('axios').default;
@@ -86,15 +86,12 @@ const Finances = () => {
         }
     };
 
-
-    
-
   
     useEffect(() => {
-        setTimeout(() => {
-            getFinancesStat();
-                getFinances();
-        }, 1000);
+        setTimeout(async() => {
+            await getFinancesStat();
+            await getFinances();
+        }, 0);
     }, []);
 
     const [showFilter, setShowFilter] = useState(false);
@@ -116,7 +113,7 @@ const Finances = () => {
     });
 
     return (
-        <div className='users_wrapper'>
+        <div className='users_wrapper wrapper--finances'>
     {loading ? (
         <Loader />
       ) : error ? (
@@ -166,7 +163,7 @@ const Finances = () => {
                             <div className='filter_counter'>0</div>
                             <span className="material-symbols-outlined">tune</span>
                         </div>
-                        <div>{showFilter ? <Filter /> : null}</div>
+                        <div>{showFilter ? <FilterFinances /> : null}</div>
                         </div>
                         <div className='table_input input'>
                             <input className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
@@ -183,56 +180,56 @@ const Finances = () => {
                             paddingLeft: '10px',
                         }}>
                             <button type="button" 
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Название объявления
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Оплачено (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Заработок серв. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Стоимость зак. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button" 
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Прибыль (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Заработано хоз. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Плательщик
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
                             <button type="button"  
-                         className='table_title'>
+                         className='table_title table_title--finances'>
                                 Статус
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>

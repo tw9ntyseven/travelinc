@@ -4,6 +4,8 @@ import '../../components/table/table.css'
 import usePagination from "../../hooks/usePagination";
 import Loader from '../../components/loader/loader';
 import Filter from '../../components/filter/filter';
+import { TableCard } from '../finances/finances';
+import { thousandSeparator } from '../dashboard/dashboard';
 const axios = require('axios').default;
 
 
@@ -48,7 +50,7 @@ const useSortableData = (items, config = null) => {
 
 const Users = () => {
     const [result, setResult] = useState('');
-    const [resultStat, setResultStat] = useState()
+    const [resultStat, setResultStat] = useState('')
 
     // Function for timeout
     const getUsers = async() => {
@@ -61,17 +63,21 @@ const Users = () => {
                     page: 1,
                 },
                 filters: {
-                    region: "Краснодар",
-                    status: "on_validation"
+                    "status": "on_validation",
+                    "region": "Краснодар",
                 },
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
                 })
                 .then(function (response) {
                     //handle success
                     setLoading(false);
+                    
                     setResult(response.data.users);
+                    // localStorage.setItem("dataUsers", JSON.stringify(response.data.users));
+                    // setResult(localStorage.getItem("dataUsers"));
+                    // console.log(localStorage.getItem("dataUsers"), "DATA USERS");
                     console.log(response, "USERS");
                 })
                 .catch(function (response) {
@@ -86,7 +92,7 @@ const Users = () => {
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
-                    type: 'get_dashboard_users_stats',
+                    type: 'get_dashboard_users_stat',
                 },
                 headers: {
                     "Content-Type": "multipart/form-data"
@@ -94,7 +100,7 @@ const Users = () => {
                 })
                 .then(function (response) {
                     setLoading(false);
-                    setResultStat(response);
+                    setResultStat(response.data);
                     console.log(response, "USERS STATS");
                 })
                 .catch(function (response) {
@@ -104,8 +110,10 @@ const Users = () => {
     };
 
     useEffect(() => {
-            getUsers();
-            getUserStats();
+        setTimeout(async() => {
+            await getUserStats();
+            await getUsers();
+        }, 0);
     }, []);
 
     const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
@@ -128,8 +136,42 @@ const Users = () => {
             .length
     });
 
+
     return (
         <div className='users_wrapper'>
+    {loading ? (
+        <Loader />
+      ) : error ? (
+        <h2>Error fetching users</h2>
+      ) : (
+        <>
+        <TableCard items={[
+                {
+                    count: thousandSeparator(resultStat.total_users),
+                    description: 'Активных пользователей',
+                    icon: 'Profile'
+                },
+                {
+                    count: thousandSeparator(resultStat.not_confirmed_users),
+                    description: 'Не подтвержденных пользователей',
+                    icon: 'Close'
+                },
+                {
+                    count: thousandSeparator(resultStat.confirmed_users),
+                    description: 'Подтвержденные пользователи',
+                    icon: 'Tick'
+                },
+                {
+                    count: thousandSeparator(resultStat.on_validation),
+                    description: 'Заявка на авторизацию',
+                    icon: 'Clock'
+                },
+                {
+                    count: thousandSeparator(resultStat.blocked),
+                    description: 'Заблокированных пользователей',
+                    icon: 'blocked-users'
+                },
+        ]} />
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>
@@ -154,11 +196,7 @@ const Users = () => {
                     </div>
                 </div>
             </div>
-        {loading ? (
-        <Loader />
-      ) : error ? (
-        <h2>Error fetching users</h2>
-      ) : (
+
             <table className="table">
                 <thead className="table_head">
                     <tr>
@@ -240,7 +278,6 @@ const Users = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
                         .keys(result)
                         .slice(firstContentIndex, lastContentIndex)
@@ -287,11 +324,6 @@ const Users = () => {
                                                         color: '#F05050'
                                                     }}
                                                         className="material-symbols-outlined">cancel</span>;
-                                                    {/* case 'waitingConfirmed':
-                return <span style={{color: '#FFBF00'}} className="material-symbols-outlined">timelapse</span>;
-              case 'blocked':
-                return <span style={{color: '#666669'}} className="material-symbols-outlined">lock</span>; */
-                                                    }
                                             }
                                         })()}
                                     </td>
@@ -310,7 +342,7 @@ const Users = () => {
                         })}
                 </tbody>
             </table>
- )}
+
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}
@@ -334,7 +366,8 @@ const Users = () => {
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
             </div>
-
+            </>
+            )}
         </div>
     );
 

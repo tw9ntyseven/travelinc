@@ -33,3 +33,32 @@
     border-radius: 8px;
     cursor: pointer;
 }
+
+.filter-orders {
+    display: flex;
+    right: 150px;
+}
+.filter_block {
+    margin-bottom: 20px;
+    display: grid;
+    /* align-items: start; */
+    align-content: start;
+    grid-template-columns: 100%;
+    /* grid-template-rows: 50% 50%; */
+    align-items: stretch;
+    gap: 10px 0;
+}
+.filter_date {
+    margin: 0 !important;
+    width: 325px;
+    height: 36px;
+    padding: 0 10px;
+    display: flex;
+
+    font-size: 16px;
+    color: #000;
+    border: 1px solid #C4C4C4;
+    border-radius: 8px;
+    font-family: AvenirNext;
+    outline: none;
+}
