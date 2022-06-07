@@ -155,13 +155,21 @@ const Dashboard = () => {
                 })
                 .then(function (response) {
                     //handle success
+
+                    localStorage.setItem("dashboardUsers", JSON.stringify(response.data.users));
+                    localStorage.setItem("dashboardListings", JSON.stringify(response.data.listings));
+                    localStorage.setItem("dashboardFinances", JSON.stringify(response.data.finances));
+                    localStorage.setItem("dashboardDataToday", JSON.stringify(response.data.activity[timeSpanToday]));
+                    localStorage.setItem("dashboardDataFirstDayMonth", JSON.stringify(response.data.activity[timeSpanFirstOfTheMonth]));
                     setLoading(false);
-                    console.log(response.data.activity[timeSpanFirstOfTheMonth], "RESPONSE");
-                    setUsers(response.data.users);
-                    setListings(response.data.listings);
-                    setFinances(response.data.finances);
-                    setDataToday(response.data.activity[timeSpanToday]);
-                    setDataFirstDayMonth(response.data.activity[timeSpanFirstOfTheMonth]);
+
+                    console.log(response, "Dashboard");
+
+                    // setUsers(response.data.users);
+                    // setListings(response.data.listings);
+                    // setFinances(response.data.finances);
+                    // setDataToday(response.data.activity[timeSpanToday]);
+                    // setDataFirstDayMonth(response.data.activity[timeSpanFirstOfTheMonth]);
                 })
                 .catch(function (response) {
                     //handle error
@@ -169,12 +177,18 @@ const Dashboard = () => {
                     console.log(response.err);
                 });
     };
-
+    getDashboard();
     useEffect(() => {
-            getDashboard();
-            // getDashboardToday();
+        getDashboard();
     }, []);
-
+    const dashboardUsers = JSON.parse(localStorage.getItem("dashboardUsers"));
+    const dashboardListings = JSON.parse(localStorage.getItem("dashboardListings"));
+    const dashboardFinances = JSON.parse(localStorage.getItem("dashboardFinances"));
+    const dashboardDataToday = JSON.parse(localStorage.getItem("dashboardDataToday"));
+    const dashboardDataFirstDayMonth = JSON.parse(localStorage.getItem("dashboardDataFirstDayMonth"));
+    if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth === null) {
+        console.log("data is null");
+    };
     // DATA FOR LINECHART
     ChartJS.register(
         CategoryScale,
@@ -257,37 +271,30 @@ const Dashboard = () => {
 
     return (
         <div className='dashboard'>
-            {loading
-                ? (<Loader/>)
-                : error
-                    ? (
-                        <h2>Error fetching users</h2>
-                    )
-                    : (
-                        <div>
+        
                             <details open>
                                 <summary>Пользователи</summary>
                                 <DashboardCard
                                     items={[
                                     {
                                         icon: 'Profile',
-                                        count: thousandSeparator(users.total_users),
+                                        count: thousandSeparator(dashboardUsers.total_users),
                                         description: 'Активных пользователей'
                                     }, {
                                         icon: 'Close',
-                                        count: thousandSeparator(users.not_confirmed_users),
+                                        count: thousandSeparator(dashboardUsers.not_confirmed_users),
                                         description: 'Не подтвержденных пользователей'
                                     }, {
                                         icon: 'Tick',
-                                        count: thousandSeparator(users.confirmed_users),
+                                        count: thousandSeparator(dashboardUsers.confirmed_users),
                                         description: 'Подтвержденных пользователей'
                                     }, {
                                         icon: 'Clock',
-                                        count: thousandSeparator(users.users_on_validation),
+                                        count: thousandSeparator(dashboardUsers.users_on_validation),
                                         description: 'Заявка на авторизацию'
                                     }, {
                                         icon: 'blocked-users',
-                                        count: thousandSeparator(users.blocked_users),
+                                        count: thousandSeparator(dashboardUsers.blocked_users),
                                         description: 'Заблокированных пользователей'
                                     }
                                 ]}/>
@@ -299,27 +306,27 @@ const Dashboard = () => {
                                     items={[
                                     {
                                         icon: 'Document',
-                                        count: thousandSeparator(listings.total_listings),
+                                        count: thousandSeparator(dashboardListings.total_listings),
                                         description: 'Объявлений всего'
                                     }, {
                                         icon: 'Activity',
-                                        count: thousandSeparator(listings.active_listings),
+                                        count: thousandSeparator(dashboardListings.active_listings),
                                         description: 'Активных объявлений'
                                     }, {
                                         icon: 'Clock',
-                                        count: thousandSeparator(listings.listings_on_moderation),
+                                        count: thousandSeparator(dashboardListings.listings_on_moderation),
                                         description: 'Объявлений на модерации'
                                     }, {
                                         icon: 'Folder',
-                                        count: thousandSeparator(listings.archived_listings),
+                                        count: thousandSeparator(dashboardListings.archived_listings),
                                         description: 'Объявлений в архиве'
                                     }, {
                                         icon: 'Paper',
-                                        count: thousandSeparator(listings.total_bookings),
+                                        count: thousandSeparator(dashboardListings.total_bookings),
                                         description: 'Заказов всего'
                                     }, {
                                         icon: 'Close',
-                                        count: thousandSeparator(listings.canceled_bookings),
+                                        count: thousandSeparator(dashboardListings.canceled_bookings),
                                         description: 'Отмененных заказов'
                                     }
                                 ]}/>
@@ -331,27 +338,27 @@ const Dashboard = () => {
                                     items={[
                                     {
                                         icon: 'Graph',
-                                        count: thousandSeparator(finances.paid_bookings),
+                                        count: thousandSeparator(dashboardFinances.paid_bookings),
                                         description: 'Оплаченных заказов'
                                     }, {
                                         icon: 'Buy',
-                                        count: thousandSeparator(finances.total_bookings_price),
+                                        count: thousandSeparator(dashboardFinances.total_bookings_price),
                                         description: 'Сумма заказов (₽)'
                                     }, {
                                         icon: 'Wallet',
-                                        count: thousandSeparator(finances.total_earned_by_owners),
+                                        count: thousandSeparator(dashboardFinances.total_earned_by_owners),
                                         description: 'Заработано хозяевами (₽)'
                                     }, {
                                         icon: 'Discount',
-                                        count: thousandSeparator(finances.paid_with_commission),
+                                        count: thousandSeparator(dashboardFinances.paid_with_commission),
                                         description: 'Оплачено с комиссиями (₽)'
                                     }, {
                                         icon: 'Close',
-                                        count: thousandSeparator(finances.paid_on_canceled_listings),
+                                        count: thousandSeparator(dashboardFinances.paid_on_canceled_listings),
                                         description: 'Выплачено по отказам (₽)'
                                     }, {
                                         icon: 'Wallet',
-                                        count: thousandSeparator(finances.net_profit),
+                                        count: thousandSeparator(dashboardFinances.net_profit),
                                         description: 'Чистой прибыли (₽)'
                                     }
                                 ]}/>
@@ -364,57 +371,57 @@ const Dashboard = () => {
                                     {
                                         icon: 'Profile',
                                         new: true,
-                                        count: thousandSeparator(dataToday.new_users),
+                                        count: thousandSeparator(dashboardDataToday.new_users),
                                         description: 'Новых пользователей'
                                     }, {
                                         icon: 'PDocument',
                                         new: true,
-                                        count: thousandSeparator(dataToday.new_listings),
+                                        count: thousandSeparator(dashboardDataToday.new_listings),
                                         description: 'Новых объявлений'
                                     }, {
                                         icon: 'Paper',
                                         new: true,
-                                        count: thousandSeparator(dataToday.new_bookings),
+                                        count: thousandSeparator(dashboardDataToday.new_bookings),
                                         description: 'Новых заказов'
                                     }, {
                                         icon: 'Clock',
                                         new: true,
-                                        count: thousandSeparator(dataToday.bookings_on_confirmation),
+                                        count: thousandSeparator(dashboardDataToday.bookings_on_confirmation),
                                         description: 'Заказов в ожидании'
                                     }, {
                                         icon: 'Close',
                                         new: true,
-                                        count: thousandSeparator(dataToday.canceled_bookings),
+                                        count: thousandSeparator(dashboardDataToday.canceled_bookings),
                                         description: 'Отмененных заказов'
                                     }, {
                                         icon: 'Close',
                                         new: true,
-                                        count: thousandSeparator(dataToday.paid_on_canceled),
+                                        count: thousandSeparator(dashboardDataToday.paid_on_canceled),
                                         description: 'Выплачено по отказам (₽)'
                                     }, {
                                         icon: 'Graph',
                                         new: true,
-                                        count: thousandSeparator(dataToday.paid_bookings),
+                                        count: thousandSeparator(dashboardDataToday.paid_bookings),
                                         description: 'Оплаченных заказов'
                                     }, {
                                         icon: 'Buy',
                                         new: true,
-                                        count: thousandSeparator(dataToday.bookings_total_price),
+                                        count: thousandSeparator(dashboardDataToday.bookings_total_price),
                                         description: 'Сумма заказов (₽)'
                                     }, {
                                         icon: 'Wallet',
                                         new: true,
-                                        count: thousandSeparator(dataToday.earned_by_owners),
+                                        count: thousandSeparator(dashboardDataToday.earned_by_owners),
                                         description: 'Заработанно хозяевами (₽)'
                                     }, {
                                         icon: 'Discount',
                                         new: true,
-                                        count: thousandSeparator(dataToday.paid_with_commissions),
+                                        count: thousandSeparator(dashboardDataToday.paid_with_commissions),
                                         description: 'Оплачено с комиссиями (₽)'
                                     }, {
                                         icon: 'Wallet',
                                         new: true,
-                                        count: thousandSeparator(dataToday.net_profit),
+                                        count: thousandSeparator(dashboardDataToday.net_profit),
                                         description: 'Чистой прибыли (₽)'
                                     }
                                 ]}/>
@@ -428,57 +435,57 @@ const Dashboard = () => {
                                     {
                                         icon: 'Profile',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.new_users),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.new_users),
                                         description: 'Новых пользователей'
                                     }, {
                                         icon: 'PDocument',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.new_listings),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.new_listings),
                                         description: 'Новых объявлений'
                                     }, {
                                         icon: 'Paper',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.new_bookings),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.new_bookings),
                                         description: 'Новых заказов'
                                     }, {
                                         icon: 'Clock',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.bookings_on_confirmation),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.bookings_on_confirmation),
                                         description: 'Заказов в ожидании'
                                     }, {
                                         icon: 'Close',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.canceled_bookings),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.canceled_bookings),
                                         description: 'Отмененных заказов'
                                     }, {
                                         icon: 'Close',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.paid_on_canceled),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.paid_on_canceled),
                                         description: 'Выплачено по отказам (₽)'
                                     }, {
                                         icon: 'Graph',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.paid_bookings),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.paid_bookings),
                                         description: 'Оплаченных заказов'
                                     }, {
                                         icon: 'Buy',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.bookings_total_price),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.bookings_total_price),
                                         description: 'Сумма заказов (₽)'
                                     }, {
                                         icon: 'Wallet',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.earned_by_owners),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.earned_by_owners),
                                         description: 'Заработанно хозяевами (₽)'
                                     }, {
                                         icon: 'Discount',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.paid_with_commissions),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.paid_with_commissions),
                                         description: 'Оплачено с комиссиями (₽)'
                                     }, {
                                         icon: 'Wallet',
                                         new: true,
-                                        count: thousandSeparator(dataFirstDayMonth.net_profit),
+                                        count: thousandSeparator(dashboardDataFirstDayMonth.net_profit),
                                         description: 'Чистой прибыли (₽)'
                                     }
                                 ]}/>
@@ -520,8 +527,6 @@ const Dashboard = () => {
                                 {/*    </div>*/}
                                 {/*</div>*/}
                         </div>
-                    )}
-        </div>
     );
 }
 

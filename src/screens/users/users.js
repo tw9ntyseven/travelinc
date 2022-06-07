@@ -62,10 +62,9 @@ const Users = () => {
                     per_page: 100,
                     page: 1,
                 },
-                filters: {
-                    "status": "on_validation",
-                    "region": "Краснодар",
-                },
+                // filters: {
+                //     region: "Краснодар",
+                // },
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
@@ -74,8 +73,8 @@ const Users = () => {
                     //handle success
                     setLoading(false);
                     
-                    setResult(response.data.users);
-                    // localStorage.setItem("dataUsers", JSON.stringify(response.data.users));
+                    // setResult(response.data.users);
+                    localStorage.setItem("dataUsers", JSON.stringify(response.data.users));
                     // setResult(localStorage.getItem("dataUsers"));
                     // console.log(localStorage.getItem("dataUsers"), "DATA USERS");
                     console.log(response, "USERS");
@@ -100,7 +99,8 @@ const Users = () => {
                 })
                 .then(function (response) {
                     setLoading(false);
-                    setResultStat(response.data);
+                    // setResultStat(response.data);
+                    localStorage.setItem("dataUsersStats", JSON.stringify(response.data));
                     console.log(response, "USERS STATS");
                 })
                 .catch(function (response) {
@@ -109,12 +109,32 @@ const Users = () => {
                 });
     };
 
+    getUserStats();
+    getUsers();
     useEffect(() => {
+        // window.addEventListener('onbeforeunload', getUsers())
         setTimeout(async() => {
             await getUserStats();
             await getUsers();
         }, 0);
     }, []);
+
+    // if (window.performance) {
+    //     if (performance.navigation.type == 1) {
+    //         ;
+    //     } else {
+    //       alert( "This page is not reloaded");
+    //     }
+    //   }
+    // await getUsers();
+
+
+    const data = JSON.parse(localStorage.getItem("dataUsers"));
+    const dataStats = JSON.parse(localStorage.getItem("dataUsersStats"));
+
+
+    console.log(result, "RESULT from local");
+    console.log(data, "DATA from local");
 
     const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
 
@@ -132,46 +152,42 @@ const Users = () => {
     } = usePagination({
         contentPerPage: 10,
         count: Object
-            .keys(result)
+            .keys(data)
             .length
     });
 
 
     return (
         <div className='users_wrapper'>
-    {loading ? (
-        <Loader />
-      ) : error ? (
-        <h2>Error fetching users</h2>
-      ) : (
-        <>
+  
         <TableCard items={[
                 {
-                    count: thousandSeparator(resultStat.total_users),
+                    count: thousandSeparator(dataStats.total_users),
                     description: 'Активных пользователей',
                     icon: 'Profile'
                 },
                 {
-                    count: thousandSeparator(resultStat.not_confirmed_users),
+                    count: thousandSeparator(dataStats.not_confirmed_users),
                     description: 'Не подтвержденных пользователей',
                     icon: 'Close'
                 },
                 {
-                    count: thousandSeparator(resultStat.confirmed_users),
+                    count: thousandSeparator(dataStats.confirmed_users),
                     description: 'Подтвержденные пользователи',
                     icon: 'Tick'
                 },
                 {
-                    count: thousandSeparator(resultStat.on_validation),
+                    count: thousandSeparator(dataStats.on_validation),
                     description: 'Заявка на авторизацию',
                     icon: 'Clock'
                 },
                 {
-                    count: thousandSeparator(resultStat.blocked),
+                    count: thousandSeparator(dataStats.blocked),
                     description: 'Заблокированных пользователей',
                     icon: 'blocked-users'
                 },
         ]} />
+        
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>
@@ -278,8 +294,7 @@ const Users = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object
-                        .keys(result)
+                    {Object.keys(data)
                         .slice(firstContentIndex, lastContentIndex)
                         .map((item, index) => {
                             return (
@@ -288,22 +303,22 @@ const Users = () => {
                                         style={{
                                         paddingLeft: '10px'
                                     }}
-                                        className="table-body_item">{result[item].login}</td>
+                                        className="table-body_item">{data ? data[item].login : "Нет данных"}</td>
                                     <td className="table-body_item">
-                                        {result[item].avatar
-                                            ? <img className='table-body_img' src={result[item].avatar}/>
+                                        {data[item].avatar
+                                            ? <img className='table-body_img' src={data[item].avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
-                                        {result[item].first_name
+                                        {data[item].first_name
                                             ? <span>
-                                                    {result[item].first_name}&#160;
-                                                    {result[item].last_name}
+                                                    {data[item].first_name}&#160;
+                                                    {data[item].last_name}
                                                 </span>
                                             : <span className='no-data'>
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {result[item].phone
-                                        ? <td className="table-body_item">{result[item].phone}</td>
+                                    {data[item].phone
+                                        ? <td className="table-body_item">{data ? data[item].phone : "Нет данных"}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                     <td
                                         style={{
@@ -311,7 +326,7 @@ const Users = () => {
                                     }}
                                         className="table-body_item">
                                         {(() => {
-                                            switch (result[item].confirmed) {
+                                            switch (data[item].confirmed) {
                                                 case true:
                                                     return <span
                                                         style={{
@@ -327,14 +342,14 @@ const Users = () => {
                                             }
                                         })()}
                                     </td>
-                                    <td className="table-body_item">{result[item].orders_count}</td>
-                                    <td className="table-body_item">{result[item].bookings_count}</td>
-                                    <td className="table-body_item">{result[item].active_listings}</td>
-                                    {result[item].city
-                                        ? <td className="table-body_item">{result[item].city}</td>
+                                    <td className="table-body_item">{data ? data[item].orders_count : 'Нет данных'}</td>
+                                    <td className="table-body_item">{data ? data[item].bookings_count : "Нет данных"}</td>
+                                    <td className="table-body_item">{data[item].active_listings}</td>
+                                    {data[item].city
+                                        ? <td className="table-body_item">{data[item].city}</td>
                                         : <td className="table-body_item no-data">Город не указан</td>}
-                                        {result[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{result[item].rating.toFixed(1)}</td> :
+                                        {data[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
+                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{data[item].rating.toFixed(1)}</td> :
                                          <td style={{textAlign: 'center'}} className="table-body_item">
                                          <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>--.--</td>}
                                 </tr>
@@ -366,8 +381,7 @@ const Users = () => {
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
             </div>
-            </>
-            )}
+
         </div>
     );
 

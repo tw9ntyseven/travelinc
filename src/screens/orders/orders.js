@@ -13,9 +13,6 @@ const Orders = () => {
 
     // Function for timeout
     const getOrders = async() => {
-        const waitTime = 5000;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
             await axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -23,15 +20,15 @@ const Orders = () => {
                     type: 'get_dashboard_orders_list',
                     per_page: 100,
                     page: 1,
-                    // filters: {
-                    //     region: "151",
-                    //     status: "paid",
-                    //     date: {
-                    //         "start_date": "2022-05-22",
-                    //         "end_date": "2022-05-27"
-                    //     }
-                    // }
                 
+                },
+                filters: {
+                    region: "151",
+                    status: "paid",
+                    date: {
+                        "start_date": "2022-05-22",
+                        "end_date": "2022-05-27"
+                    }
                 },
                     headers: {
                         "Content-Type": "multipart/form-data"
@@ -40,49 +37,61 @@ const Orders = () => {
                 .then(function (response) {
                     //handle success
                     setLoading(false);
-                    setResult(response.data.post);
-                    console.log(response.data.post, "ORDERS");
+ 
+
+
+                    // if(response.data.post == null) return response.data.post = [];
+                    // setResult(response.data.post);
+                    localStorage.setItem("dataOrders", JSON.stringify(response.data.post));
+                    localStorage.setItem("dataOrdersStats", JSON.stringify(response.data));
+                    // setResultStat(response.data);
+                    console.log(response.data, "ORDERS");
                 })
                 .catch(function (response) {
                     //handle error
                     setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
+
     };
 
-    const getOrdersStats = async() => {
-        await axios({
-            method: "POST",
-            url: "https://easytake.org/custom.php",
-            data: {
-                type: 'get_dashboard_orders_stat',
-            },
-            headers: {
-                "Content-Type": "multipart/form-data"
-            }
-            })
-            .then(function (response) {
-                setLoading(false);
-                setResultStat(response.data);
-                console.log(response, "ORDERS STATS");
-            })
-            .catch(function (response) {
-                setError(true);
-                console.log(response.err);
-            });
-};
-
+//     const getOrdersStats = async() => {
+//         await axios({
+//             method: "POST",
+//             url: "https://easytake.org/custom.php",
+//             data: {
+//                 type: 'get_dashboard_orders_stat',
+//             },
+//             headers: {
+//                 "Content-Type": "multipart/form-data"
+//             }
+//             })
+//             .then(function (response) {
+//                 setLoading(false);
+//                 setResultStat(response.data);
+//                 console.log(response, "ORDERS STATS");
+//             })
+//             .catch(function (response) {
+//                 setError(true);
+//                 console.log(response.err);
+//             });
+// };
+    getOrders();
     useEffect(() => {
-        setTimeout(async() => {
-            await getOrders();
-            // await getOrdersStats();
-        }, 0);
+        getOrders();
     }, []);
 
-    console.log(result, "RESULT");
+    const data = JSON.parse(localStorage.getItem("dataOrders"));
+    const dataStats = JSON.parse(localStorage.getItem("dataOrdersStats"));
+
+    if (data || dataStats === null) {
+        console.log("data is null");
+    };
+    console.log(data, "DATA from local");
+    // console.log(dataStats, "DATA STATS from local");
+    // console.log(resultStat, "RESULT STAT");
+
+
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -95,47 +104,41 @@ const Orders = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: 25,
+        contentPerPage: 20,
         count: Object
-            .keys(result)
+            .keys(data)
             .length
     });
 
     return (
-        <div className='users_wrapper'>
-    {loading ? (
-        <Loader />
-      ) : error ? (
-        <h2>Error fetching orders</h2>
-      ) : (
-        <>
-        {/* <TableCard items={[
+        <div className='orders_wrapper'>
+        <TableCard items={[
                 {
-                    count: thousandSeparator(resultStat.total_users),
-                    description: 'Активных пользователей',
-                    icon: 'Profile'
+                    count: thousandSeparator(dataStats.total_bookings),
+                    description: 'Количество заказов',
+                    icon: 'PDocument'
                 },
                 {
-                    count: thousandSeparator(resultStat.not_confirmed_users),
-                    description: 'Не подтвержденных пользователей',
-                    icon: 'Close'
-                },
-                {
-                    count: thousandSeparator(resultStat.confirmed_users),
-                    description: 'Подтвержденные пользователи',
+                    count: thousandSeparator(dataStats.paid),
+                    description: 'Оплаченные',
                     icon: 'Tick'
                 },
                 {
-                    count: thousandSeparator(resultStat.on_validation),
-                    description: 'Заявка на авторизацию',
-                    icon: 'Clock'
+                    count: thousandSeparator(dataStats.canceled),
+                    description: 'Отмененные',
+                    icon: 'Close'
                 },
                 {
-                    count: thousandSeparator(resultStat.blocked),
-                    description: 'Заблокированных пользователей',
-                    icon: 'blocked-users'
+                    count: thousandSeparator(dataStats.reservation),
+                    description: 'В ожидании',
+                    icon: 'Clock'
                 },
-        ]} /> */}
+                // {
+                //     count: thousandSeparator(dataStats.reservation),
+                //     description: 'В ожидании',
+                //     icon: 'Clock'
+                // },
+        ]} />
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>
@@ -213,7 +216,7 @@ const Orders = () => {
                 <tbody>
                     {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
-                        .keys(result)
+                        .keys(data)
                         .slice(firstContentIndex, lastContentIndex)
                         .map((item, index) => {
                             return (
@@ -224,13 +227,13 @@ const Orders = () => {
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {result[item].title}
+                                            {data[item].title}
                                         </td>
 
                                     <td
                                         className="table-body_item">
                                         {(() => {
-                                            switch (result[item].status) {
+                                            switch (data[item].status) {
                                                 case "paid":
                                                     return <div className="table_body_item-status table_body_item-status--paid">Оплачено</div>;
                                                 case "expired":
@@ -246,28 +249,28 @@ const Orders = () => {
                                     </td>
                                     <td
                                         className="table-body_item">
-                                        <div className="">{result[item].booking_author_login}</div></td>
+                                        <div className="">{data[item].booking_author_login}</div></td>
                                     <td className="table-body_item">
-                                        {result[item].booking_author_avatar
-                                            ? <img className='table-body_img' src={result[item].booking_author_avatar}/>
+                                        {data[item].booking_author_avatar
+                                            ? <img className='table-body_img' src={data[item].booking_author_avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
-                                        {result[item].booking_author_first_name
+                                        {data[item].booking_author_first_name
                                             ? <span>
-                                                    {result[item].booking_author_first_name}&#160;
-                                                    {result[item].booking_author_last_name}
+                                                    {data[item].booking_author_first_name}&#160;
+                                                    {data[item].booking_author_last_name}
                                                 </span>
                                             : <span className='no-data'>
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {result[item].booking_author_phone
-                                        ? <td className="table-body_item">{result[item].booking_author_phone}</td>
+                                    {data[item].booking_author_phone
+                                        ? <td className="table-body_item">{data[item].booking_author_phone}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                    
-                                    {result[item].region
+                                    {data[item].region
                                         ? <td style={{
                                         paddingRight: '20px'
-                                    }} className="table-body_item">{result[item].region}</td>
+                                    }} className="table-body_item">{data[item].region}</td>
                                         : <td style={{
                                         paddingRight: '20px'
                                     }} className="table-body_item no-data">Город не указан</td>}
@@ -299,8 +302,6 @@ const Orders = () => {
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
             </div>
-            </>
-      )}
         </div>
     );
 

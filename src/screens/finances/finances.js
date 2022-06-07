@@ -28,9 +28,6 @@ const Finances = () => {
 
     // GET FINANCES STAT
     const getFinancesStat = async() => {
-        const waitTime = 5000;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
             await axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -43,23 +40,18 @@ const Finances = () => {
                 })
                 .then(function (response) {
                     setLoading(false);
-                    setResultStat(response.data)
+                    localStorage.setItem("dataFinancesStat", JSON.stringify(response.data));
+                    // setResultStat(response.data)
                     console.log(response.data, "FINANCES STAT");
                 })
                 .catch(function (response) {
                     setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
     };
 
     // Function for timeout
     const getFinances = async() => {
-        const waitTime = 5000;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
             await axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -74,25 +66,28 @@ const Finances = () => {
                 })
                 .then(function (response) {
                     setLoading(false);
-                    setResult(response.data.finances);
+                    localStorage.setItem("dataFinances", JSON.stringify(response.data.finances));
+                    // setResult(response.data.finances);
                     console.log(response.data.finances, "FINANCES");
                 })
                 .catch(function (response) {
                     setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
     };
 
-  
+    getFinancesStat();
+    getFinances();
     useEffect(() => {
         setTimeout(async() => {
             await getFinancesStat();
             await getFinances();
         }, 0);
     }, []);
+
+
+    const data = JSON.parse(localStorage.getItem("dataFinances"));
+    const dataStats = JSON.parse(localStorage.getItem("dataFinancesStat"));
 
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -108,42 +103,36 @@ const Finances = () => {
     } = usePagination({
         contentPerPage: 25,
         count: Object
-            .keys(result)
+            .keys(data)
             .length
     });
 
     return (
         <div className='users_wrapper wrapper--finances'>
-    {loading ? (
-        <Loader />
-      ) : error ? (
-        <h2>Error fetching finances</h2>
-      ) : (
-          <>
         <TableCard
             items={[
                 {
-                    count: thousandSeparator(resultStat.paid_count),
+                    count: thousandSeparator(dataStats.paid_count),
                     description: 'Оплаченных заказов',
                     icon: 'Graph'
                 },
                 {
-                    count: thousandSeparator(resultStat.total_paid),
+                    count: thousandSeparator(dataStats.total_paid),
                     description: 'Сумма заказов (₽)',
                     icon: 'Buy'
                 },
                 {
-                    count: thousandSeparator(resultStat.net_profit),
+                    count: thousandSeparator(dataStats.net_profit),
                     description: 'Чистой прибыли (₽)',
                     icon: 'Wallet'
                 },
                 {
-                    count: thousandSeparator(resultStat.paid_with_commissions),
+                    count: thousandSeparator(dataStats.paid_with_commissions),
                     description: 'Оплачено с комиссиями (₽)',
                     icon: 'Discount'
                 },
                 {
-                    count: thousandSeparator(resultStat.paid_on_rejected),
+                    count: thousandSeparator(dataStats.paid_on_rejected),
                     description: 'Выплачено по отказам (₽)',
                     icon: 'DGraph'
                 },
@@ -238,7 +227,7 @@ const Finances = () => {
                 </thead>
                 <tbody>
                     {Object
-                        .keys(result)
+                        .keys(data)
                         .slice(firstContentIndex, lastContentIndex)
                         .map((item, index) => {
                             return (
@@ -249,34 +238,34 @@ const Finances = () => {
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {result[item].title}
+                                            {data[item].title}
                                         </td>
                                         
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{result[item].paid}</div></td>
+                                        <div className="">{data[item].paid}</div></td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        {result[item].earned_by_service ? <div className="">{result[item].earned_by_service}</div>
+                                        {data[item].earned_by_service ? <div className="">{data[item].earned_by_service}</div>
                                         :<div className="">0</div>}
                                     </td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        {result[item].book_cost ? <div className="">{result[item].book_cost}</div>
+                                        {data[item].book_cost ? <div className="">{data[item].book_cost}</div>
                                         :<div className="">0</div>}
                                     </td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{result[item].net_profit}</div></td>
+                                        <div className="">{data[item].net_profit}</div></td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{result[item].earned_by_owner}</div></td>
+                                        <div className="">{data[item].earned_by_owner}</div></td>
 
                                     <td className="table-body_item">
-                                        <div className="">{result[item].payer}</div></td>
+                                        <div className="">{data[item].payer}</div></td>
 
                                     <td className="table-body_item">
                                         {(() => {
-                                            switch (result[item].status) {
+                                            switch (data[item].status) {
                                                 case "paid":
                                                     return <div className="table_body_item-status table_body_item-status--paid">Оплачено</div>;
                                                 case "expired":
@@ -295,8 +284,6 @@ const Finances = () => {
                         })}
                 </tbody>
             </table>
-            </>
- )}
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}
