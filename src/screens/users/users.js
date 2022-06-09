@@ -11,7 +11,7 @@ const axios = require('axios').default;
 
 
 // Function for sorting ASC and DESC
-const useSortableData = (items, config = null) => {
+export const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = React.useState(config);
   
     const sortedItems = React.useMemo(() => {
@@ -49,9 +49,11 @@ const useSortableData = (items, config = null) => {
 
 
 const Users = () => {
-    const [result, setResult] = useState('');
-    const [resultStat, setResultStat] = useState('')
-
+    const [showFilter, setShowFilter] = useState(false);
+    const [value, setValue] = useState();
+    const refresh = async() => {
+        await getUsers();
+    }
     // Function for timeout
     const getUsers = async() => {
             await axios({
@@ -59,12 +61,10 @@ const Users = () => {
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_users_list',
-                    per_page: 100,
-                    page: 1,
+                    per_page: 10,
+                    page: page,
+                    // filters: `{"region": "Краснодар"}`
                 },
-                // filters: {
-                //     region: "Краснодар",
-                // },
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
@@ -72,12 +72,11 @@ const Users = () => {
                 .then(function (response) {
                     //handle success
                     setLoading(false);
-                    
-                    // setResult(response.data.users);
+                    localStorage.setItem("totalDataUsers", JSON.stringify(response.data));
+
                     localStorage.setItem("dataUsers", JSON.stringify(response.data.users));
-                    // setResult(localStorage.getItem("dataUsers"));
-                    // console.log(localStorage.getItem("dataUsers"), "DATA USERS");
-                    console.log(response, "USERS");
+
+                    // console.log(response.data, "DATA TOTAL");
                 })
                 .catch(function (response) {
                     //handle error
@@ -109,36 +108,15 @@ const Users = () => {
                 });
     };
 
-    getUserStats();
-    getUsers();
-    useEffect(() => {
-        // window.addEventListener('onbeforeunload', getUsers())
-        setTimeout(async() => {
-            await getUserStats();
-            await getUsers();
-        }, 0);
-    }, []);
 
-    // if (window.performance) {
-    //     if (performance.navigation.type == 1) {
-    //         ;
-    //     } else {
-    //       alert( "This page is not reloaded");
-    //     }
-    //   }
-    // await getUsers();
+
 
 
     const data = JSON.parse(localStorage.getItem("dataUsers"));
+    const dataTotal = JSON.parse(localStorage.getItem("totalDataUsers"));
     const dataStats = JSON.parse(localStorage.getItem("dataUsersStats"));
+    console.log(dataTotal, "DATA TOTAL");
 
-
-    console.log(result, "RESULT from local");
-    console.log(data, "DATA from local");
-
-    const {newResult, requestSort, sortConfig} = useSortableData(Object.keys(result));
-
-    const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const {
@@ -150,13 +128,22 @@ const Users = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: 10,
-        count: Object
-            .keys(data)
-            .length
+        contentPerPage: dataTotal.per_page,
+        count: dataTotal.total_users_count,
     });
 
+    // getUserStats();
+    // getUsers();
+    useEffect(() => {
+        setTimeout(async() => {
+            await getUserStats();
+            await getUsers();
+        }, 0);
+    }, []);
 
+    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
+
+  
     return (
         <div className='users_wrapper'>
   
@@ -212,7 +199,6 @@ const Users = () => {
                     </div>
                 </div>
             </div>
-
             <table className="table">
                 <thead className="table_head">
                     <tr>
@@ -221,7 +207,7 @@ const Users = () => {
                             paddingLeft: '10px'
                         }}>
                             <button type="button" 
-                            onClick={() => console.log("REQUEST SORT")}
+                            onClick={() => requestSort('login')}
                          className='table_title'>
                                 Логин
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -294,31 +280,31 @@ const Users = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.keys(data)
-                        .slice(firstContentIndex, lastContentIndex)
-                        .map((item, index) => {
+                        {/* .slice(firstContentIndex, lastContentIndex) */}
+                    {Object.keys(items)
+                        .map(item => {
                             return (
-                                <tr key={index} className="table_body">
+                                <tr key={items[item].id} className="table_body">
                                     <td
                                         style={{
                                         paddingLeft: '10px'
                                     }}
-                                        className="table-body_item">{data ? data[item].login : "Нет данных"}</td>
+                                        className="table-body_item">{items ? items[item].login : "Нет данных"}</td>
                                     <td className="table-body_item">
-                                        {data[item].avatar
-                                            ? <img className='table-body_img' src={data[item].avatar}/>
+                                        {items[item].avatar
+                                            ? <img className='table-body_img' src={items[item].avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
-                                        {data[item].first_name
+                                        {items[item].first_name
                                             ? <span>
-                                                    {data[item].first_name}&#160;
-                                                    {data[item].last_name}
+                                                    {items[item].first_name}&#160;
+                                                    {items[item].last_name}
                                                 </span>
                                             : <span className='no-data'>
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {data[item].phone
-                                        ? <td className="table-body_item">{data ? data[item].phone : "Нет данных"}</td>
+                                    {items[item].phone
+                                        ? <td className="table-body_item">{items ? items[item].phone : "Нет данных"}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                     <td
                                         style={{
@@ -326,7 +312,7 @@ const Users = () => {
                                     }}
                                         className="table-body_item">
                                         {(() => {
-                                            switch (data[item].confirmed) {
+                                            switch (items[item].confirmed) {
                                                 case true:
                                                     return <span
                                                         style={{
@@ -342,14 +328,14 @@ const Users = () => {
                                             }
                                         })()}
                                     </td>
-                                    <td className="table-body_item">{data ? data[item].orders_count : 'Нет данных'}</td>
-                                    <td className="table-body_item">{data ? data[item].bookings_count : "Нет данных"}</td>
-                                    <td className="table-body_item">{data[item].active_listings}</td>
-                                    {data[item].city
-                                        ? <td className="table-body_item">{data[item].city}</td>
+                                    <td className="table-body_item">{items ? items[item].orders_count : 'Нет данных'}</td>
+                                    <td className="table-body_item">{items ? items[item].bookings_count : "Нет данных"}</td>
+                                    <td className="table-body_item">{items[item].active_listings}</td>
+                                    {items[item].city
+                                        ? <td className="table-body_item">{items[item].city}</td>
                                         : <td className="table-body_item no-data">Город не указан</td>}
-                                        {data[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
-                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{data[item].rating.toFixed(1)}</td> :
+                                        {items[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
+                                         <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{items[item].rating.toFixed(1)}</td> :
                                          <td style={{textAlign: 'center'}} className="table-body_item">
                                          <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>--.--</td>}
                                 </tr>
@@ -362,12 +348,12 @@ const Users = () => {
                 <p className="pagination_text">
                     {page} из {totalPages}
                 </p>
-                <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
+                <button onClick={() => {getUsers(); prevPage();}} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
                 <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_back_ios_new</span>
                 </button>
                 {[...Array(totalPages).keys()].map((el) => (
                     <button
-                        onClick={() => setPage(el + 1)}
+                        onClick={() => {getUsers(); setPage(el + 1);}}
                         key={el}
                         className={`pagination_page ${page === el + 1
                         ? "active"
@@ -376,7 +362,7 @@ const Users = () => {
                     </button>
                 ))}
                 <button
-                    onClick={nextPage}
+                    onClick={() => {getUsers(); nextPage();}}
                     className={`pagination_page pagination_page--next ${page === totalPages && "disabled"}`}>
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>

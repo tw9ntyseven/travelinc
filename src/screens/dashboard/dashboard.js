@@ -103,43 +103,31 @@ const DashboardCard = ({items}) => {
     };
 
 const Dashboard = () => {
-    const [users,
-        setUsers] = useState()
-    const [listings,
-        setListings] = useState()
-    const [finances,
-        setFinances] = useState()
-
-    // TODAY
-    const [dataToday,
-        setDataToday] = useState()
-    const [dataFirstDayMonth,
-        setDataFirstDayMonth] = useState()
 
     const [error,
         setError] = useState(false);
     const [loading,
         setLoading] = useState(true);
 
+
+                // TIME MANAGE
+                let today = new Date();
+                var dd = String(today.getDate()).padStart(2, '0');
+                var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                var yyyy = today.getFullYear();
+                today = '"' + yyyy + '-' + mm + '-' + dd + '"';
+        
+                let firstDayMonth = new Date();
+                var firstDay = new Date(firstDayMonth.getFullYear(), firstDayMonth.getMonth(), 1);
+                var fdd = String(firstDay.getDate()).padStart(2, '0');
+                var fmm = String(firstDay.getMonth() + 1).padStart(2, '0');
+                firstDay = '"' + yyyy + '-' + fmm + '-' + fdd + '"';
+        
+                var spanToday = yyyy + '-' + mm + '-' + dd;
+                var spanFirstDay = yyyy + '-' + fmm + '-' + fdd;
+                var timeSpanToday = `${spanToday} - ${spanToday}`;
+                var timeSpanFirstOfTheMonth = `${spanFirstDay} - ${spanToday}`;
     const getDashboard = async() => {
-
-        // TIME MANAGE
-        let today = new Date();
-        var dd = String(today.getDate()).padStart(2, '0');
-        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        var yyyy = today.getFullYear();
-        today = '"' + yyyy + '-' + mm + '-' + dd + '"';
-
-        let firstDayMonth = new Date();
-        var firstDay = new Date(firstDayMonth.getFullYear(), firstDayMonth.getMonth(), 1);
-        var fdd = String(firstDay.getDate()).padStart(2, '0');
-        var fmm = String(firstDay.getMonth() + 1).padStart(2, '0');
-        firstDay = '"' + yyyy + '-' + fmm + '-' + fdd + '"';
-
-        var spanToday = yyyy + '-' + mm + '-' + dd;
-        var spanFirstDay = yyyy + '-' + fmm + '-' + fdd;
-        var timeSpanToday = `${spanToday} - ${spanToday}`;
-        var timeSpanFirstOfTheMonth = `${spanFirstDay} - ${spanToday}`;
 
             await axios({
                 method: "POST",
@@ -177,16 +165,59 @@ const Dashboard = () => {
                     console.log(response.err);
                 });
     };
+
+
+    const getDashboardProfitToday = async() => {
+        // console.log(profitToday, "profitToday");
+        await axios({
+            method: "POST",
+            url: "https://easytake.org/custom.php",
+            data: {
+                type: 'get_dashboard_profit',
+                filters: `
+                { 
+                    "date": [
+                            {
+                             "start_date": ${today},
+                             "end_date": ${today} 
+                          }
+                     ]
+                 }
+                 `
+            },
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            })
+            .then(function (response) {
+                setLoading(false);
+                // setResultStat(response.data)
+                console.log(response.data[timeSpanToday], "TODAY");
+                localStorage.setItem("dataDashboardProfitToday", JSON.stringify(response.data[timeSpanToday]));
+            })
+            .catch(function (response) {
+                setError(true);
+                console.log(response.err);
+            });
+};
+
     getDashboard();
+    getDashboardProfitToday();
     useEffect(() => {
-        getDashboard();
+        setTimeout(async() => {
+            await getDashboard();
+            await getDashboardProfitToday();  
+        }, 0);
     }, []);
+
     const dashboardUsers = JSON.parse(localStorage.getItem("dashboardUsers"));
     const dashboardListings = JSON.parse(localStorage.getItem("dashboardListings"));
     const dashboardFinances = JSON.parse(localStorage.getItem("dashboardFinances"));
     const dashboardDataToday = JSON.parse(localStorage.getItem("dashboardDataToday"));
     const dashboardDataFirstDayMonth = JSON.parse(localStorage.getItem("dashboardDataFirstDayMonth"));
-    if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth === null) {
+    const dashboardProfitToday = JSON.parse(localStorage.getItem("dataDashboardProfitToday"));
+    console.log(dashboardProfitToday.house, "dashboardProfitToday");
+    if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth || dashboardProfitToday === null) {
         console.log("data is null");
     };
     // DATA FOR LINECHART
@@ -226,7 +257,7 @@ const Dashboard = () => {
           },
           {
             label: 'Авто',
-            data: labels.map(() => faker.datatype.number({ min: 500, max: 100000 })),
+            data: [500, 1000, 1500, 22000, 25000, 30100, 3500],
             borderColor: 'rgb(53, 162, 235)',
             backgroundColor: 'rgba(53, 162, 235, 0.5)',
           },
@@ -246,7 +277,7 @@ const Dashboard = () => {
     datasets: [
         {
         label: '# of Votes',
-        data: [30, 42, 28],
+        data: [dashboardProfitToday.house, dashboardProfitToday.car, dashboardProfitToday.total],
         backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(54, 162, 235, 0.2)',
@@ -502,14 +533,14 @@ const Dashboard = () => {
                                             {/*<div className="dashboard_priceblock-piechart">*/}
                                             {/*    <Doughnut data={data} />*/}
                                             {/*</div>*/}
-                                            <div className="dashboard_priceblock-linechart">
-                                                <Line options={options} data={dataLine} />
-                                            </div>
-                                    </Tab>
-                                    <Tab label="За неделю">
                                         <div className="dashboard_priceblock-piechart">
                                             <Doughnut data={data} />
                                         </div>
+                                    </Tab>
+                                    <Tab label="За неделю">
+                                    <div className="dashboard_priceblock-linechart">
+                                                <Line options={options} data={dataLine} />
+                                            </div>
                                     </Tab>
                                     <Tab label="За месяц">
                                         3

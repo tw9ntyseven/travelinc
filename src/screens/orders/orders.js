@@ -5,6 +5,7 @@ import Filter, { FilterOrders } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { TableCard } from '../finances/finances';
+import { useSortableData } from '../users/users';
 const axios = require('axios').default;
 
 const Orders = () => {
@@ -83,6 +84,9 @@ const Orders = () => {
 
     const data = JSON.parse(localStorage.getItem("dataOrders"));
     const dataStats = JSON.parse(localStorage.getItem("dataOrdersStats"));
+
+    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
+
 
     if (data || dataStats === null) {
         console.log("data is null");
@@ -171,6 +175,7 @@ const Orders = () => {
                             paddingLeft: '10px'
                         }}>
                             <button type="button" 
+                            onClick={() => requestSort('title')}
                          className='table_title'>
                                 Название
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -178,6 +183,7 @@ const Orders = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('status')}
                          className='table_title'>
                                 Статус
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -185,6 +191,7 @@ const Orders = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('booking_author_login')}
                          className='table_title'>
                                 Арендатор
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -192,6 +199,7 @@ const Orders = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('booking_author_first_name')}
                          className='table_title'>
                                 Арендодатель
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -199,13 +207,15 @@ const Orders = () => {
                         </th>
                         <th>
                             <button type="button" 
+                            onClick={() => requestSort('booking_author_phone')}
                          className='table_title'>
                                 Телефон арендодателя
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </th>
                         <th>
-                            <button type="button"  
+                            <button type="button"
+                            onClick={() => requestSort('region')}  
                          className='table_title'>
                                 Город
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -216,24 +226,24 @@ const Orders = () => {
                 <tbody>
                     {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
-                        .keys(data)
+                        .keys(items)
                         .slice(firstContentIndex, lastContentIndex)
-                        .map((item, index) => {
+                        .map((item) => {
                             return (
-                                <tr key={index} className="table_body">
+                                <tr key={items[item].id} className="table_body">
                                     <td
                                         style={{
                                         width: '30%',
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {data[item].title}
+                                            {items[item].title}
                                         </td>
 
                                     <td
                                         className="table-body_item">
                                         {(() => {
-                                            switch (data[item].status) {
+                                            switch (items[item].status) {
                                                 case "paid":
                                                     return <div className="table_body_item-status table_body_item-status--paid">Оплачено</div>;
                                                 case "expired":
@@ -249,28 +259,28 @@ const Orders = () => {
                                     </td>
                                     <td
                                         className="table-body_item">
-                                        <div className="">{data[item].booking_author_login}</div></td>
+                                        <div className="">{items[item].booking_author_login}</div></td>
                                     <td className="table-body_item">
-                                        {data[item].booking_author_avatar
-                                            ? <img className='table-body_img' src={data[item].booking_author_avatar}/>
+                                        {items[item].booking_author_avatar
+                                            ? <img className='table-body_img' src={items[item].booking_author_avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
-                                        {data[item].booking_author_first_name
+                                        {items[item].booking_author_first_name
                                             ? <span>
-                                                    {data[item].booking_author_first_name}&#160;
-                                                    {data[item].booking_author_last_name}
+                                                    {items[item].booking_author_first_name}&#160;
+                                                    {items[item].booking_author_last_name}
                                                 </span>
                                             : <span className='no-data'>
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {data[item].booking_author_phone
-                                        ? <td className="table-body_item">{data[item].booking_author_phone}</td>
+                                    {items[item].booking_author_phone
+                                        ? <td className="table-body_item">{items[item].booking_author_phone}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                    
-                                    {data[item].region
+                                    {items[item].region
                                         ? <td style={{
                                         paddingRight: '20px'
-                                    }} className="table-body_item">{data[item].region}</td>
+                                    }} className="table-body_item">{items[item].region}</td>
                                         : <td style={{
                                         paddingRight: '20px'
                                     }} className="table-body_item no-data">Город не указан</td>}

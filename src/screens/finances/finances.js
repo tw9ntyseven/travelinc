@@ -4,6 +4,7 @@ import Loader from '../../components/loader/loader';
 import Filter, { FilterFinances } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
+import { useSortableData } from '../users/users';
 const axios = require('axios').default;
 
 export const TableCard = ({items}) => {
@@ -89,6 +90,9 @@ const Finances = () => {
     const data = JSON.parse(localStorage.getItem("dataFinances"));
     const dataStats = JSON.parse(localStorage.getItem("dataFinancesStat"));
 
+    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
+
+
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -169,6 +173,7 @@ const Finances = () => {
                             paddingLeft: '10px',
                         }}>
                             <button type="button" 
+                            onClick={() => requestSort('title')}
                          className='table_title table_title--finances'>
                                 Название объявления
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -176,6 +181,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('paid')}
                          className='table_title table_title--finances'>
                                 Оплачено (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -183,6 +189,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('earned_by_service')}
                          className='table_title table_title--finances'>
                                 Заработок серв. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -190,6 +197,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('book_cost')}
                          className='table_title table_title--finances'>
                                 Стоимость зак. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -197,6 +205,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button" 
+                            onClick={() => requestSort('net_profit')}
                          className='table_title table_title--finances'>
                                 Прибыль (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -204,6 +213,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('earned_by_owner')}
                          className='table_title table_title--finances'>
                                 Заработано хоз. (₽)
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -211,6 +221,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('payer')}
                          className='table_title table_title--finances'>
                                 Плательщик
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -218,6 +229,7 @@ const Finances = () => {
                         </th>
                         <th>
                             <button type="button"  
+                            onClick={() => requestSort('status')}
                          className='table_title table_title--finances'>
                                 Статус
                                 <span className="material-symbols-outlined">arrow_drop_down</span>
@@ -227,45 +239,45 @@ const Finances = () => {
                 </thead>
                 <tbody>
                     {Object
-                        .keys(data)
+                        .keys(items)
                         .slice(firstContentIndex, lastContentIndex)
-                        .map((item, index) => {
+                        .map(item => {
                             return (
-                                <tr key={index} className="table_body">
+                                <tr key={items[item].id} className="table_body">
                                     <td
                                         style={{
                                         width: '20%',
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {data[item].title}
+                                            {items[item].title}
                                         </td>
                                         
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{data[item].paid}</div></td>
+                                        <div className="">{items[item].paid}</div></td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        {data[item].earned_by_service ? <div className="">{data[item].earned_by_service}</div>
+                                        {items[item].earned_by_service ? <div className="">{items[item].earned_by_service}</div>
                                         :<div className="">0</div>}
                                     </td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        {data[item].book_cost ? <div className="">{data[item].book_cost}</div>
+                                        {items[item].book_cost ? <div className="">{items[item].book_cost}</div>
                                         :<div className="">0</div>}
                                     </td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{data[item].net_profit}</div></td>
+                                        <div className="">{items[item].net_profit}</div></td>
 
                                     <td style={{textAlign: 'center'}} className="table-body_item">
-                                        <div className="">{data[item].earned_by_owner}</div></td>
+                                        <div className="">{items[item].earned_by_owner}</div></td>
 
                                     <td className="table-body_item">
-                                        <div className="">{data[item].payer}</div></td>
+                                        <div className="">{items[item].payer}</div></td>
 
                                     <td className="table-body_item">
                                         {(() => {
-                                            switch (data[item].status) {
+                                            switch (items[item].status) {
                                                 case "paid":
                                                     return <div className="table_body_item-status table_body_item-status--paid">Оплачено</div>;
                                                 case "expired":
