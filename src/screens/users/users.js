@@ -3,6 +3,7 @@ import './users.css'
 import '../../components/table/table.css'
 import usePagination from "../../hooks/usePagination";
 import Loader from '../../components/loader/loader';
+import {LoadingCards, LoadingSkeletonTable} from "../../components/loading-skeleton/loading-skeleton";
 import Filter from '../../components/filter/filter';
 import { TableCard } from '../finances/finances';
 import { thousandSeparator } from '../dashboard/dashboard';
@@ -49,19 +50,26 @@ export const useSortableData = (items, config = null) => {
 
 
 const Users = () => {
+    const [result, setResult] = useState([]);
+    const [resultStat, setResultStat] = useState([]);
+    const [resultTotal, setResultTotal] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showFilter, setShowFilter] = useState(false);
     const [value, setValue] = useState();
-    const refresh = async() => {
-        await getUsers();
-    }
-    // Function for timeout
-    const getUsers = async() => {
-            await axios({
+
+    useEffect(() => {
+        getUserStats();
+        getUsers();
+    }, []);
+
+
+    const getUsers = () => {
+            axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_users_list',
-                    per_page: 10,
+                    per_page: 15,
                     page: page,
                     // filters: `{"region": "Краснодар"}`
                 },
@@ -70,23 +78,18 @@ const Users = () => {
                 }
                 })
                 .then(function (response) {
-                    //handle success
+                    setResultTotal(response.data);
+                    setResult(response.data.users);        
                     setLoading(false);
-                    localStorage.setItem("totalDataUsers", JSON.stringify(response.data));
-
-                    localStorage.setItem("dataUsers", JSON.stringify(response.data.users));
-
-                    // console.log(response.data, "DATA TOTAL");
+                    console.log(response, "RESPONSE");
                 })
                 .catch(function (response) {
-                    //handle error
-                    setError(true);
                     console.log(response.err);
                 });
     };
 
-    const getUserStats = async() => {
-            await axios({
+    const getUserStats = () => {
+            axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
@@ -97,28 +100,15 @@ const Users = () => {
                 }
                 })
                 .then(function (response) {
+                    setResultStat(response.data);
                     setLoading(false);
-                    // setResultStat(response.data);
-                    localStorage.setItem("dataUsersStats", JSON.stringify(response.data));
-                    console.log(response, "USERS STATS");
+                    console.log(response, "RESPONSE STATS");
                 })
                 .catch(function (response) {
-                    setError(true);
                     console.log(response.err);
                 });
     };
 
-
-
-
-
-    const data = JSON.parse(localStorage.getItem("dataUsers"));
-    const dataTotal = JSON.parse(localStorage.getItem("totalDataUsers"));
-    const dataStats = JSON.parse(localStorage.getItem("dataUsersStats"));
-    console.log(dataTotal, "DATA TOTAL");
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const {
         firstContentIndex,
         lastContentIndex,
@@ -128,52 +118,48 @@ const Users = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: dataTotal.per_page,
-        count: dataTotal.total_users_count,
+        contentPerPage: 15,
+        count: Object.keys(result).length,
     });
 
-    // getUserStats();
-    // getUsers();
-    useEffect(() => {
-        setTimeout(async() => {
-            await getUserStats();
-            await getUsers();
-        }, 0);
-    }, []);
+    // contentPerPage: resultTotal.per_page,
+    // count: resultTotal.total_users_count,
+    const refresh = () => {
+        getUsers();
+    }
 
-    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
-
+    const {items, requestSort, sortConfig} = useSortableData(Object.values(result));
   
     return (
         <div className='users_wrapper'>
   
-        <TableCard items={[
+       {loading ? <LoadingCards /> : <TableCard items={[
                 {
-                    count: thousandSeparator(dataStats.total_users),
+                    count: thousandSeparator(resultStat.total_users),
                     description: 'Активных пользователей',
                     icon: 'Profile'
                 },
                 {
-                    count: thousandSeparator(dataStats.not_confirmed_users),
+                    count: thousandSeparator(resultStat.not_confirmed_users),
                     description: 'Не подтвержденных пользователей',
                     icon: 'Close'
                 },
                 {
-                    count: thousandSeparator(dataStats.confirmed_users),
+                    count: thousandSeparator(resultStat.confirmed_users),
                     description: 'Подтвержденные пользователи',
                     icon: 'Tick'
                 },
                 {
-                    count: thousandSeparator(dataStats.on_validation),
+                    count: thousandSeparator(resultStat.on_validation),
                     description: 'Заявка на авторизацию',
                     icon: 'Clock'
                 },
                 {
-                    count: thousandSeparator(dataStats.blocked),
+                    count: thousandSeparator(resultStat.blocked),
                     description: 'Заблокированных пользователей',
                     icon: 'blocked-users'
                 },
-        ]} />
+        ]} />}
         
             <div className='users'>
                 <div className='users_header'>
@@ -279,19 +265,20 @@ const Users = () => {
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                        {/* .slice(firstContentIndex, lastContentIndex) */}
-                    {Object.keys(items)
-                        .map(item => {
+               <tbody>
+                    {Object
+                        .keys(items)
+                        .slice(firstContentIndex, lastContentIndex)
+                        .map((item) => {
                             return (
-                                <tr key={items[item].id} className="table_body">
+                                <tr key={loading ? <LoadingSkeletonTable /> : items[item].id} className="table_body">
                                     <td
                                         style={{
                                         paddingLeft: '10px'
                                     }}
-                                        className="table-body_item">{items ? items[item].login : "Нет данных"}</td>
+                                        className="table-body_item">{loading ? <LoadingSkeletonTable /> : items[item].login}</td>
                                     <td className="table-body_item">
-                                        {items[item].avatar
+                                        {loading ? <LoadingSkeletonTable /> : items[item].avatar
                                             ? <img className='table-body_img' src={items[item].avatar}/>
                                             : <span className="material-symbols-outlined no-img_table">account_circle</span>}
                                         {items[item].first_name
@@ -303,7 +290,7 @@ const Users = () => {
                                                 Нет имени
                                             </span>}
                                     </td>
-                                    {items[item].phone
+                                    {loading ? <LoadingSkeletonTable /> : items[item].phone
                                         ? <td className="table-body_item">{items ? items[item].phone : "Нет данных"}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                     <td
@@ -312,7 +299,7 @@ const Users = () => {
                                     }}
                                         className="table-body_item">
                                         {(() => {
-                                            switch (items[item].confirmed) {
+                                            switch (loading ? <LoadingSkeletonTable /> : items[item].confirmed) {
                                                 case true:
                                                     return <span
                                                         style={{
@@ -328,13 +315,13 @@ const Users = () => {
                                             }
                                         })()}
                                     </td>
-                                    <td className="table-body_item">{items ? items[item].orders_count : 'Нет данных'}</td>
-                                    <td className="table-body_item">{items ? items[item].bookings_count : "Нет данных"}</td>
-                                    <td className="table-body_item">{items[item].active_listings}</td>
-                                    {items[item].city
+                                    <td className="table-body_item">{loading ? <LoadingSkeletonTable /> : items[item].orders_count}</td>
+                                    <td className="table-body_item">{loading ? <LoadingSkeletonTable /> : items[item].bookings_count}</td>
+                                    <td className="table-body_item">{loading ? <LoadingSkeletonTable /> : items[item].active_listings}</td>
+                                    {loading ? <LoadingSkeletonTable /> : items[item].city
                                         ? <td className="table-body_item">{items[item].city}</td>
                                         : <td className="table-body_item no-data">Город не указан</td>}
-                                        {items[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
+                                        {loading ? <LoadingSkeletonTable /> : items[item].rating ? <td style={{textAlign: 'center'}} className="table-body_item">
                                          <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>{items[item].rating.toFixed(1)}</td> :
                                          <td style={{textAlign: 'center'}} className="table-body_item">
                                          <span style={{fontSize: '20px', verticalAlign: 'middle'}} className="material-symbols-outlined">star</span>--.--</td>}

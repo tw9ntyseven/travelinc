@@ -72,7 +72,7 @@
 }
 .table_cards-item {
     margin-right: 10px;
-    width: 240px;
+    width: 200px auto;
     height: 110px;
     padding: 18px;
     display: flex;

@@ -5,6 +5,7 @@ import Filter, { FilterFinances } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { useSortableData } from '../users/users';
+import { LoadingCards } from '../../components/loading-skeleton/loading-skeleton';
 const axios = require('axios').default;
 
 export const TableCard = ({items}) => {
@@ -24,12 +25,17 @@ export const TableCard = ({items}) => {
 }
 // get_dashboard_finance_stat
 const Finances = () => {
-    const [result, setResult] = useState('');
-    const [resultStat, setResultStat] = useState();
+    const [result, setResult] = useState([]);
+    const [resultStat, setResultStat] = useState([]);
+    
+    useEffect(() => {
+        getFinancesStat();
+        getFinances();
+    }, []);
 
     // GET FINANCES STAT
-    const getFinancesStat = async() => {
-            await axios({
+    const getFinancesStat = () => {
+            axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
@@ -40,9 +46,9 @@ const Finances = () => {
                     }
                 })
                 .then(function (response) {
+                    // localStorage.setItem("dataFinancesStat", JSON.stringify(response.data));
+                    setResultStat(response.data)
                     setLoading(false);
-                    localStorage.setItem("dataFinancesStat", JSON.stringify(response.data));
-                    // setResultStat(response.data)
                     console.log(response.data, "FINANCES STAT");
                 })
                 .catch(function (response) {
@@ -52,8 +58,8 @@ const Finances = () => {
     };
 
     // Function for timeout
-    const getFinances = async() => {
-            await axios({
+    const getFinances = () => {
+             axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
@@ -66,9 +72,9 @@ const Finances = () => {
                     }
                 })
                 .then(function (response) {
+                    // localStorage.setItem("dataFinances", JSON.stringify(response.data.finances));
+                    setResult(response.data.finances);
                     setLoading(false);
-                    localStorage.setItem("dataFinances", JSON.stringify(response.data.finances));
-                    // setResult(response.data.finances);
                     console.log(response.data.finances, "FINANCES");
                 })
                 .catch(function (response) {
@@ -77,25 +83,20 @@ const Finances = () => {
                 });
     };
 
-    getFinancesStat();
-    getFinances();
-    useEffect(() => {
-        setTimeout(async() => {
-            await getFinancesStat();
-            await getFinances();
-        }, 0);
-    }, []);
 
 
-    const data = JSON.parse(localStorage.getItem("dataFinances"));
-    const dataStats = JSON.parse(localStorage.getItem("dataFinancesStat"));
 
-    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
+
+    // const data = JSON.parse(localStorage.getItem("dataFinances"));
+    // const dataStats = JSON.parse(localStorage.getItem("dataFinancesStat"));
+
+    const {items, requestSort, sortConfig} = useSortableData(result);
 
 
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+
     const {
         firstContentIndex,
         lastContentIndex,
@@ -107,40 +108,40 @@ const Finances = () => {
     } = usePagination({
         contentPerPage: 25,
         count: Object
-            .keys(data)
+            .keys(result)
             .length
     });
 
     return (
         <div className='users_wrapper wrapper--finances'>
-        <TableCard
+        {loading ? <LoadingCards/> : <TableCard
             items={[
                 {
-                    count: thousandSeparator(dataStats.paid_count),
+                    count: thousandSeparator(resultStat.paid_count),
                     description: 'Оплаченных заказов',
                     icon: 'Graph'
                 },
                 {
-                    count: thousandSeparator(dataStats.total_paid),
+                    count: thousandSeparator(resultStat.total_paid),
                     description: 'Сумма заказов (₽)',
                     icon: 'Buy'
                 },
                 {
-                    count: thousandSeparator(dataStats.net_profit),
+                    count: thousandSeparator(resultStat.net_profit),
                     description: 'Чистой прибыли (₽)',
                     icon: 'Wallet'
                 },
                 {
-                    count: thousandSeparator(dataStats.paid_with_commissions),
+                    count: thousandSeparator(resultStat.paid_with_commissions),
                     description: 'Оплачено с комиссиями (₽)',
                     icon: 'Discount'
                 },
                 {
-                    count: thousandSeparator(dataStats.paid_on_rejected),
+                    count: thousandSeparator(resultStat.paid_on_rejected),
                     description: 'Выплачено по отказам (₽)',
                     icon: 'DGraph'
                 },
-            ]} />
+            ]} />}
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>

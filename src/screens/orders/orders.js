@@ -6,12 +6,16 @@ import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { TableCard } from '../finances/finances';
 import { useSortableData } from '../users/users';
+import { LoadingCards, LoadingSkeletonTable } from '../../components/loading-skeleton/loading-skeleton';
 const axios = require('axios').default;
 
 const Orders = () => {
     const [result, setResult] = useState('');
     const [resultStat, setResultStat] = useState('')
 
+    useEffect(() => {
+        getOrders();
+    }, []);
     // Function for timeout
     const getOrders = async() => {
             await axios({
@@ -37,15 +41,11 @@ const Orders = () => {
                 })
                 .then(function (response) {
                     //handle success
+                    setResultStat(response.data);
+                    setResult(response.data.post);
                     setLoading(false);
- 
-
-
-                    // if(response.data.post == null) return response.data.post = [];
-                    // setResult(response.data.post);
-                    localStorage.setItem("dataOrders", JSON.stringify(response.data.post));
-                    localStorage.setItem("dataOrdersStats", JSON.stringify(response.data));
-                    // setResultStat(response.data);
+                    // localStorage.setItem("dataOrders", JSON.stringify(response.data.post));
+                    // localStorage.setItem("dataOrdersStats", JSON.stringify(response.data));
                     console.log(response.data, "ORDERS");
                 })
                 .catch(function (response) {
@@ -56,42 +56,18 @@ const Orders = () => {
 
     };
 
-//     const getOrdersStats = async() => {
-//         await axios({
-//             method: "POST",
-//             url: "https://easytake.org/custom.php",
-//             data: {
-//                 type: 'get_dashboard_orders_stat',
-//             },
-//             headers: {
-//                 "Content-Type": "multipart/form-data"
-//             }
-//             })
-//             .then(function (response) {
-//                 setLoading(false);
-//                 setResultStat(response.data);
-//                 console.log(response, "ORDERS STATS");
-//             })
-//             .catch(function (response) {
-//                 setError(true);
-//                 console.log(response.err);
-//             });
-// };
-    getOrders();
-    useEffect(() => {
-        getOrders();
-    }, []);
-
-    const data = JSON.parse(localStorage.getItem("dataOrders"));
-    const dataStats = JSON.parse(localStorage.getItem("dataOrdersStats"));
-
-    const {items, requestSort, sortConfig} = useSortableData(Object.values(data));
 
 
-    if (data || dataStats === null) {
-        console.log("data is null");
-    };
-    console.log(data, "DATA from local");
+    // const data = JSON.parse(localStorage.getItem("dataOrders"));
+    // const dataStats = JSON.parse(localStorage.getItem("dataOrdersStats"));
+
+    const {items, requestSort, sortConfig} = useSortableData(result);
+
+
+    // if (data || dataStats === null) {
+    //     console.log("data is null");
+    // };
+    // console.log(data, "DATA from local");
     // console.log(dataStats, "DATA STATS from local");
     // console.log(resultStat, "RESULT STAT");
 
@@ -110,30 +86,30 @@ const Orders = () => {
     } = usePagination({
         contentPerPage: 20,
         count: Object
-            .keys(data)
+            .keys(result)
             .length
     });
 
     return (
         <div className='orders_wrapper'>
-        <TableCard items={[
+        {loading ? <LoadingCards /> : <TableCard items={[
                 {
-                    count: thousandSeparator(dataStats.total_bookings),
+                    count: thousandSeparator(resultStat.total_bookings),
                     description: 'Количество заказов',
                     icon: 'PDocument'
                 },
                 {
-                    count: thousandSeparator(dataStats.paid),
+                    count: thousandSeparator(resultStat.paid),
                     description: 'Оплаченные',
                     icon: 'Tick'
                 },
                 {
-                    count: thousandSeparator(dataStats.canceled),
+                    count: thousandSeparator(resultStat.canceled),
                     description: 'Отмененные',
                     icon: 'Close'
                 },
                 {
-                    count: thousandSeparator(dataStats.reservation),
+                    count: thousandSeparator(resultStat.reservation),
                     description: 'В ожидании',
                     icon: 'Clock'
                 },
@@ -142,7 +118,7 @@ const Orders = () => {
                 //     description: 'В ожидании',
                 //     icon: 'Clock'
                 // },
-        ]} />
+        ]} />}
             <div className='users'>
                 <div className='users_header'>
                     <div className='title'>
@@ -223,7 +199,7 @@ const Orders = () => {
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
                         .keys(items)
@@ -237,7 +213,7 @@ const Orders = () => {
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {items[item].title}
+                                            {loading ? <LoadingSkeletonTable /> : items[item].title}
                                         </td>
 
                                     <td

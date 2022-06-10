@@ -216,7 +216,7 @@ const Dashboard = () => {
     const dashboardDataToday = JSON.parse(localStorage.getItem("dashboardDataToday"));
     const dashboardDataFirstDayMonth = JSON.parse(localStorage.getItem("dashboardDataFirstDayMonth"));
     const dashboardProfitToday = JSON.parse(localStorage.getItem("dataDashboardProfitToday"));
-    console.log(dashboardProfitToday.house, "dashboardProfitToday");
+    console.log(dashboardProfitToday, "dashboardProfitToday");
     if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth || dashboardProfitToday === null) {
         console.log("data is null");
     };
@@ -277,7 +277,7 @@ const Dashboard = () => {
     datasets: [
         {
         label: '# of Votes',
-        data: [dashboardProfitToday.house, dashboardProfitToday.car, dashboardProfitToday.total],
+        data: [dashboardProfitToday.house, dashboardProfitToday.car, dashboardProfitToday.activity],
         backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(54, 162, 235, 0.2)',
