@@ -6,6 +6,7 @@
     border-radius: 8px;
     background-color: #fff;
     box-sizing: border-box;
+    z-index: 1000;
 }
 .filter_checkbox-block {
     margin-top: 20px;

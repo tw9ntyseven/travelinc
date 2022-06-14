@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from 'react'
-import Loader from '../../components/loader/loader';
 import './dashboard.css';
 // import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import {

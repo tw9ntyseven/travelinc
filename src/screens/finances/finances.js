@@ -1,28 +1,15 @@
 import React, {useState, useEffect} from 'react'
 import './finances.css'
-import Loader from '../../components/loader/loader';
 import Filter, { FilterFinances } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { useSortableData } from '../users/users';
 import { LoadingCards } from '../../components/loading-skeleton/loading-skeleton';
+import { TableCard } from '../../components/table/table';
+
 const axios = require('axios').default;
 
-export const TableCard = ({items}) => {
-    return (
-        <div className='table_cards'>
-            {items.map((item, index) => (
-                <div key={index} className='table_cards-item'>
-                <div className="table_cards-item-block">
-                    <div className='dashboard_block-card-count flex'>{item.count}</div>
-                    <div className='dashboard_block-card-description'>{item.description}</div>
-                </div>
-                    <img style={{width: '65px'}} src={require(`../../assets/dashboard-icons/${item.icon}.svg`)}/>
-                </div>
-            ))}
-        </div>
-    );
-}
+
 // get_dashboard_finance_stat
 const Finances = () => {
     const [result, setResult] = useState([]);

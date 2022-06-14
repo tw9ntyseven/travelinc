@@ -4,7 +4,52 @@ import 'react-loading-skeleton/dist/skeleton.css'
 
 export const LoadingSkeletonTable = () => {
     return (
-        <Skeleton count={1} />
+        <tbody>
+            <tr>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+            </tr>
+            <tr>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+            </tr>
+            <tr>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+            </tr>
+            <tr>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+                <td style={{textAlign: 'center'}} className="table-body_item"><Skeleton count={1} width={60} height={20} /></td>
+            </tr>
+        </tbody>
     );
 }
 
@@ -19,7 +64,7 @@ export const LoadingCards = () => {
                 wrapper={InlineWrapperWithMargin}
                 inline
                 width={200}
-                height={110}
+                height={120}
             />
         </div>
     );

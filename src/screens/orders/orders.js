@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import './orders.css'
-import Loader from '../../components/loader/loader';
 import Filter, { FilterOrders } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
-import { TableCard } from '../finances/finances';
 import { useSortableData } from '../users/users';
 import { LoadingCards, LoadingSkeletonTable } from '../../components/loading-skeleton/loading-skeleton';
+import { TableCard } from '../../components/table/table';
+
 const axios = require('axios').default;
 
 const Orders = () => {

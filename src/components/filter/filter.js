@@ -9,12 +9,12 @@ const axios = require('axios').default;
 
 const Filter = () => {
 const [res, setRes] = useState([]);
+useEffect(() => {
+    getRegions();
+}, []);
 
-    const getRegions = async() => {
-        const waitTime = 5000;
-        setTimeout(() => console.log("Request taking a long time"), waitTime);
-        try {
-            await axios({
+    const getRegions = () => {
+            axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data:{
@@ -35,34 +35,13 @@ const [res, setRes] = useState([]);
                     // setError(true);
                     console.log(response.err);
                 });
-        } catch (error) {
-            console.log("FAIL!", error.message);
-        }
     };
 
-    useEffect(() => {
-        setTimeout(() => {
-            getRegions();
-        }, 1000);
-    }, []);
-
-    // for (let value of Object.entries(res)) {
-    //     console.log(value.name, "CITIES NAME");
-    // }
-    // console.log(Object.values(res));
-    // const options = [];
-    // Object.values(res).forEach((item, index, arr) => {
-    //     console.log(item.name, "FOREACH");
-    // })
     let result = Object.values(res).map(function(item, index) {
         const options = {value: item.slug, label: item.name};
         return options;
       });
 
-    // var obj = {};
-    // obj["value"] = options.label;
-    // obj["label"] = options.value;
-    // options.push(obj);
 
       const customStyles = {
         option: (provided, state) => ({
