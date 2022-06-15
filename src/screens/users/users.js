@@ -9,6 +9,7 @@ import { TableCard } from '../../components/table/table';
 import Select from 'react-select'
 import { Checkbox, CheckboxGroup } from '@trendmicro/react-checkbox';
 import '@trendmicro/react-checkbox/dist/react-checkbox.css';
+import { Notification } from '../../components/notification/notification';
 const axios = require('axios').default;
 
 
@@ -62,6 +63,9 @@ const Users = () => {
     const [loadingTable, setLoadingTable] = useState(true);
     const [showFilter, setShowFilter] = useState(false);
     const [value, setValue] = useState();
+    const [showNotification, setShowNotification] = useState(false);
+
+
 
     useEffect(() => {
         getUserStats();
@@ -70,17 +74,21 @@ const Users = () => {
     }, []);
 
 
-    const getUsers = () => {
-        let filtersRegion, filtersStatus;
-        // if (region == '') {
-        //     filtersRegion = `"region": "${region}"`
-        //     filtersRegion = filtersRegion.replace(/[`]+/g, '');
-        // }
-        // if (status == '') {
-        //     filtersStatus = `"status": "${status}"`
-        //     filtersStatus = filtersStatus.replace(/[`]+/g, '');
-        // }
-        if (region != '' || status != '') {
+    
+    const getUsers = (page) => {
+        let filter, filtersRegion, filtersStatus;
+
+        if (region != '' && status == '') {
+            filtersRegion = `"region": "${region}"`
+            filtersRegion = filtersRegion.replace(/[`]+/g, '');
+            filter = `{${filtersRegion}}`
+        }
+        if (region == '' && status != '') {
+            filtersStatus = `"status": "${status}"`
+            filtersStatus = filtersStatus.replace(/[`]+/g, '');
+            filter = `{${filtersStatus}}`
+        }
+        if (region != '' && status != '') {
             filtersRegion = `"region": "${region}"`
             filtersRegion = filtersRegion.replace(/[`]+/g, '');
             console.log(filtersRegion, 'filtersRegion');
@@ -88,6 +96,7 @@ const Users = () => {
             filtersStatus = `"status": "${status}"`
             filtersStatus = filtersStatus.replace(/[`]+/g, '');
             console.log(filtersStatus, 'filtersStatus');
+            filter = `{${filtersRegion}, ${filtersStatus}}`
         }
 
             axios({
@@ -95,17 +104,17 @@ const Users = () => {
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_users_list',
-                    per_page: 50,
-                    page: page,
-                    filters: `{${filtersRegion}, ${filtersStatus}}`,
+                    per_page: 15,
+                    page: page ? page : 1,
+                    filters: filter,
                 },
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
                 })
                 .then(function (response) {
-                    setResultTotal(response.data);
-                    setResult(response.data.users);        
+                    setResultTotal(response.data.total_users_count);
+                    setResult(response.data.users);
                     setLoadingTable(false);
                     console.log(response, "RESPONSE");
                 })
@@ -162,23 +171,42 @@ const Users = () => {
     });
 
     const changeRegionFunc = (region) => {
-        setRegion(region);
+        // Object.values(result).forEach(item => {
+        //     if (item.city === region) {
+                setRegion(region);
+            // } else {
+            //     console.log("Такого города у пользователей нет!");
+            // }
+        // })
+        
     }
 
+    const {
+        firstContentIndex,
+        lastContentIndex,
+        nextPage,
+        prevPage,
+        page,
+        setPage,
+        totalPages
+    } = usePagination({
+        contentPerPage: 15,
+        count: resultTotal,
+    });
 
   const customStyles = {
     option: (provided, state) => ({
       ...provided,
       margin: '4px 0px',
       padding: 5,
-      color: '#000',
+      // color: '#000',
       color: state.isSelected ? 'white' : 'black',
       backgroungColor: state.isSelected ? 'blue' :'#B1DBFB',
       borderRadius: '8px',
     }),
     control: () => ({
       display: 'flex',
-      border: 0,
+      // border: 0,
       width: 345,
       color: '#000',
       border: '1px solid #C4C4C4',
@@ -191,52 +219,41 @@ const Users = () => {
     })
   }
 
-    const {
-        firstContentIndex,
-        lastContentIndex,
-        nextPage,
-        prevPage,
-        page,
-        setPage,
-        totalPages
-    } = usePagination({
-        contentPerPage: 15,
-        count: Object.keys(result).length,
-    });
-
     const checkBoxOnValidation = useCallback(
       (e) => {
         setStatus("on_validation");
-      }, [""],
+      }, [''],
     )
     const checkBoxConfirmed = useCallback(
         (e) => {
           setStatus("confirmed");
-        }, [""],
+        }, [''],
       )
       const checkBoxNotConfirmed = useCallback(
         (e) => {
           setStatus("not_confirmed");
-        }, [""],
+        }, [''],
       )
 
-    // contentPerPage: resultTotal.per_page,
-    // count: resultTotal.total_users_count,
     const refresh = () => {
-        setShowFilter(!showFilter);
-        setLoadingTable(true);
-        getUsers();
+        if (region == '' && status == '') {
+            alert("Установите фильтры!");
+            // setShowNotification(!showNotification);
+        } else {
+            setShowFilter(!showFilter);
+            setLoadingTable(true);
+            getUsers();
+        }
     }
-    const pagino = () => {
+    const pagino = (page) => {
         setLoadingTable(true);
-        getUsers();
+        getUsers(page);
     }
 
     const {items, requestSort, sortConfig} = useSortableData(Object.values(result));
   
     return (
         <div className='users_wrapper'>
-  
        {loading ? <LoadingCards /> : <TableCard items={[
                 {
                     count: thousandSeparator(resultStat.total_users),
@@ -264,8 +281,8 @@ const Users = () => {
                     icon: 'blocked-users'
                 },
         ]} />}
-        
             <div className='users'>
+            {/* {showNotification ? <Notification /> : null} */}
                 <div className='users_header'>
                     <div className='title'>
                         <span
@@ -283,6 +300,7 @@ const Users = () => {
                         <div>{showFilter ? 
                             <div className='filter'>
                                 <Select
+                                    // value={region}
                                     placeholder="Город"
                                     components={{ IndicatorSeparator:() => null }}
                                     options={regions}
@@ -291,9 +309,9 @@ const Users = () => {
                                 />
                                 <div className='filter_checkbox-block'>
                                 <div className='filter_checkbox-column'>
-                                    <Checkbox onChange={checkBoxConfirmed} className="filter_checkbox-column-item" label="Подтвержденные" />
-                                    <Checkbox onChange={checkBoxNotConfirmed} className="filter_checkbox-column-item" label="Не подтвержденные" />
-                                    <Checkbox onChange={checkBoxOnValidation} className="filter_checkbox-column-item" label="На проверке" />
+                                    <Checkbox checked={status == "confirmed" ? true : false} onChange={checkBoxConfirmed} className="filter_checkbox-column-item" label="Подтвержденные" />
+                                    <Checkbox checked={status == "not_confirmed" ? true : false} onChange={checkBoxNotConfirmed} className="filter_checkbox-column-item" label="Не подтвержденные" />
+                                    <Checkbox checked={status == "on_validation" ? true : false} onChange={checkBoxOnValidation} className="filter_checkbox-column-item" label="На проверке" />
                                     <Checkbox className="filter_checkbox-column-item" label="С объявлениями" />
                                 </div>
                                 <div className='filter_checkbox-column'>
@@ -395,11 +413,11 @@ const Users = () => {
                         </th>
                     </tr>
                 </thead>
-            {loadingTable ? <LoadingSkeletonTable /> :
+            {loadingTable ? <LoadingSkeletonTable items={[{},{},{},{},{},{}]} /> :
                <tbody>
+                        {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
                         .keys(items)
-                        .slice(firstContentIndex, lastContentIndex)
                         .map((item) => {
                             return (
                                 <tr key={items[item].id} className="table_body">
@@ -425,10 +443,7 @@ const Users = () => {
                                         ? <td className="table-body_item">{items ? items[item].phone : "Нет данных"}</td>
                                         : <td className="table-body_item no-data">Нет номера</td>}
                                     <td
-                                        style={{
-                                        textAlign: 'center'
-                                    }}
-                                        className="table-body_item">
+                                        style={{textAlign: 'center'}} className="table-body_item">
                                         {(() => {
                                             switch (items[item].confirmed) {
                                                 case true:
@@ -467,12 +482,12 @@ const Users = () => {
                 <p className="pagination_text">
                     {page} из {totalPages}
                 </p>
-                <button onClick={() => {pagino(); prevPage();}} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
+                {/* <button onClick={e => {prevPage(); pagino(page - 1)}} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
                 <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_back_ios_new</span>
-                </button>
+                </button> */}
                 {[...Array(totalPages).keys()].map((el) => (
                     <button
-                        onClick={() => {pagino(); setPage(el + 1);}}
+                        onClick={e => {setPage(el + 1); pagino(el + 1)}}
                         key={el}
                         className={`pagination_page ${page === el + 1
                         ? "active"
@@ -480,14 +495,13 @@ const Users = () => {
                         {el + 1}
                     </button>
                 ))}
-                <button
-                    onClick={() => {pagino(); nextPage();}}
+                {/* <button
+                    onClick={e => {nextPage(); pagino(page + 1)}}
                     className={`pagination_page pagination_page--next ${page === totalPages && "disabled"}`}>
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
-                </button>
+                </button> */}
             </div>
-
-        </div>
+    </div>
     );
 
 }

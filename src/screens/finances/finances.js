@@ -4,7 +4,7 @@ import Filter, { FilterFinances } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { useSortableData } from '../users/users';
-import { LoadingCards } from '../../components/loading-skeleton/loading-skeleton';
+import { LoadingCards, LoadingSkeletonTableFinances } from '../../components/loading-skeleton/loading-skeleton';
 import { TableCard } from '../../components/table/table';
 
 const axios = require('axios').default;
@@ -14,6 +14,10 @@ const axios = require('axios').default;
 const Finances = () => {
     const [result, setResult] = useState([]);
     const [resultStat, setResultStat] = useState([]);
+    const [resultTotal, setResultTotal] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [loadingStats, setLoadingStats] = useState(true);
     
     useEffect(() => {
         getFinancesStat();
@@ -35,54 +39,39 @@ const Finances = () => {
                 .then(function (response) {
                     // localStorage.setItem("dataFinancesStat", JSON.stringify(response.data));
                     setResultStat(response.data)
-                    setLoading(false);
+                    setLoadingStats(false);
                     console.log(response.data, "FINANCES STAT");
                 })
                 .catch(function (response) {
-                    setError(true);
                     console.log(response.err);
                 });
     };
 
     // Function for timeout
-    const getFinances = () => {
+    const getFinances = (page) => {
              axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_finance_list',
-                    page: 1,                
-                    per_page: 100,
+                    page: page ? page : 1,                
+                    per_page: 50,
                 },
                     headers: {
                         "Content-Type": "multipart/form-data"
                     }
                 })
                 .then(function (response) {
-                    // localStorage.setItem("dataFinances", JSON.stringify(response.data.finances));
+                    setResultTotal(response.data.total_bookings);
                     setResult(response.data.finances);
                     setLoading(false);
                     console.log(response.data.finances, "FINANCES");
                 })
                 .catch(function (response) {
-                    setError(true);
                     console.log(response.err);
                 });
     };
 
-
-
-
-
-    // const data = JSON.parse(localStorage.getItem("dataFinances"));
-    // const dataStats = JSON.parse(localStorage.getItem("dataFinancesStat"));
-
-    const {items, requestSort, sortConfig} = useSortableData(result);
-
-
-    const [showFilter, setShowFilter] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
     const {
         firstContentIndex,
@@ -93,15 +82,20 @@ const Finances = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: 25,
-        count: Object
-            .keys(result)
-            .length
+        contentPerPage: 50,
+        count: resultTotal
     });
+
+    const {items, requestSort, sortConfig} = useSortableData(result);
+
+    const pagino = (page) => {
+        setLoading(true);
+        getFinances(page);
+    }
 
     return (
         <div className='users_wrapper wrapper--finances'>
-        {loading ? <LoadingCards/> : <TableCard
+        {loadingStats ? <LoadingCards/> : <TableCard
             items={[
                 {
                     count: thousandSeparator(resultStat.paid_count),
@@ -225,10 +219,9 @@ const Finances = () => {
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+               {loading ? <LoadingSkeletonTableFinances items={[{},{},{},{},{},{}]} /> : <tbody>
                     {Object
                         .keys(items)
-                        .slice(firstContentIndex, lastContentIndex)
                         .map(item => {
                             return (
                                 <tr key={items[item].id} className="table_body">
@@ -282,18 +275,18 @@ const Finances = () => {
                                 </tr>
                             )
                         })}
-                </tbody>
+                </tbody>}
             </table>
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}
                 </p>
-                <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
+                {/* <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
                 <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_back_ios_new</span>
-                </button>
+                </button> */}
                 {[...Array(totalPages).keys()].map((el) => (
                     <button
-                        onClick={() => setPage(el + 1)}
+                        onClick={() => {setPage(el + 1); pagino(el + 1)}}
                         key={el}
                         className={`pagination_page ${page === el + 1
                         ? "active"
@@ -301,11 +294,11 @@ const Finances = () => {
                         {el + 1}
                     </button>
                 ))}
-                <button
+                {/* <button
                     onClick={nextPage}
                     className={`pagination_page pagination_page--next ${page === totalPages && "disabled"}`}>
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
-                </button>
+                </button> */}
             </div>
 
         </div>

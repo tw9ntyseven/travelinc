@@ -1,10 +1,10 @@
 .users_wrapper  {
-    width: 100%;
+    max-width: 1200px;
 }
 
 .users {
     padding: 0.8rem 1rem;
-    width: 100% !important;
+    width: 100%;
 
     border-radius: 8px 8px 0 0;
     background-color: #fff;

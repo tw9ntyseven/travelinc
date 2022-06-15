@@ -4,77 +4,85 @@ import Filter, { FilterOrders } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { useSortableData } from '../users/users';
-import { LoadingCards, LoadingSkeletonTable } from '../../components/loading-skeleton/loading-skeleton';
+import { LoadingCards, LoadingSkeletonTableOrders } from '../../components/loading-skeleton/loading-skeleton';
 import { TableCard } from '../../components/table/table';
 
 const axios = require('axios').default;
 
 const Orders = () => {
-    const [result, setResult] = useState('');
-    const [resultStat, setResultStat] = useState('')
+    const [result, setResult] = useState([]);
+    const [resultStat, setResultStat] = useState([]);
+    const [resultTotal, setResultTotal] = useState([]);
+    const [showFilter, setShowFilter] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [loadingStats, setLoadingStats] = useState(true);
 
     useEffect(() => {
         getOrders();
+        getOrdersStat();
     }, []);
-    // Function for timeout
-    const getOrders = async() => {
-            await axios({
+
+    const getOrders = (page) => {
+            axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
                 data: {
                     type: 'get_dashboard_orders_list',
-                    per_page: 100,
-                    page: 1,
+                    per_page: 50,
+                    page: page ? page : 1,
                 
                 },
-                filters: {
-                    region: "151",
-                    status: "paid",
-                    date: {
-                        "start_date": "2022-05-22",
-                        "end_date": "2022-05-27"
-                    }
-                },
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
+                // filters: {
+                //     region: "151",
+                //     status: "paid",
+                //     date: {
+                //         "start_date": "2022-05-22",
+                //         "end_date": "2022-05-27"
+                //     }
+                // },
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
                 })
                 .then(function (response) {
-                    //handle success
-                    setResultStat(response.data);
+                    // setResultStat(response.data);
+                    setResultTotal(response.data.total_bookings)
                     setResult(response.data.post);
                     setLoading(false);
-                    // localStorage.setItem("dataOrders", JSON.stringify(response.data.post));
-                    // localStorage.setItem("dataOrdersStats", JSON.stringify(response.data));
-                    console.log(response.data, "ORDERS");
+                    console.log(response, "ORDERS");
                 })
                 .catch(function (response) {
-                    //handle error
-                    setError(true);
                     console.log(response.err);
                 });
 
     };
 
+    const getOrdersStat = () => {
+        axios({
+            method: "POST",
+            url: "https://easytake.org/custom.php",
+            data: {
+                type: 'get_dashboard_orders_list',
+                per_page: 1,
+                page: 1,
+            },
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+            })
+            .then(function (response) {
+                setResultStat(response.data);
+                setLoadingStats(false);
+                console.log(response.data, "ORDERS Stat");
+            })
+            .catch(function (response) {
+                console.log(response.err);
+            });
 
-
-    // const data = JSON.parse(localStorage.getItem("dataOrders"));
-    // const dataStats = JSON.parse(localStorage.getItem("dataOrdersStats"));
+};
 
     const {items, requestSort, sortConfig} = useSortableData(result);
 
-
-    // if (data || dataStats === null) {
-    //     console.log("data is null");
-    // };
-    // console.log(data, "DATA from local");
-    // console.log(dataStats, "DATA STATS from local");
-    // console.log(resultStat, "RESULT STAT");
-
-
-    const [showFilter, setShowFilter] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const {
         firstContentIndex,
         lastContentIndex,
@@ -84,15 +92,18 @@ const Orders = () => {
         setPage,
         totalPages
     } = usePagination({
-        contentPerPage: 20,
-        count: Object
-            .keys(result)
-            .length
+        contentPerPage: 50,
+        count: resultTotal
     });
+
+    const pagino = (page) => {
+        setLoading(true);
+        getOrders(page);
+    }
 
     return (
         <div className='orders_wrapper'>
-        {loading ? <LoadingCards /> : <TableCard items={[
+        {loadingStats ? <LoadingCards /> : <TableCard items={[
                 {
                     count: thousandSeparator(resultStat.total_bookings),
                     description: 'Количество заказов',
@@ -199,11 +210,10 @@ const Orders = () => {
                         </th>
                     </tr>
                 </thead>
-               <tbody>
+              {loading ? <LoadingSkeletonTableOrders items={[{},{},{},{},{},{}]} /> : <tbody>
                     {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
                         .keys(items)
-                        .slice(firstContentIndex, lastContentIndex)
                         .map((item) => {
                             return (
                                 <tr key={items[item].id} className="table_body">
@@ -213,7 +223,7 @@ const Orders = () => {
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {loading ? <LoadingSkeletonTable /> : items[item].title}
+                                            {items[item].title}
                                         </td>
 
                                     <td
@@ -263,18 +273,18 @@ const Orders = () => {
                                 </tr>
                             )
                         })}
-                </tbody>
+                </tbody>}
             </table>
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}
                 </p>
-                <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
+                {/* <button onClick={prevPage} className={`pagination_page pagination_page--prev ${page === 1 && "disabled"}`}>
                 <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_back_ios_new</span>
-                </button>
+                </button> */}
                 {[...Array(totalPages).keys()].map((el) => (
                     <button
-                        onClick={() => setPage(el + 1)}
+                        onClick={e => {setPage(el + 1); pagino(el + 1)}}
                         key={el}
                         className={`pagination_page ${page === el + 1
                         ? "active"
@@ -282,11 +292,11 @@ const Orders = () => {
                         {el + 1}
                     </button>
                 ))}
-                <button
+                {/* <button
                     onClick={nextPage}
                     className={`pagination_page pagination_page--next ${page === totalPages && "disabled"}`}>
                     <span style={{fontSize: '22px'}} className="material-symbols-outlined">arrow_forward_ios</span>
-                </button>
+                </button> */}
             </div>
         </div>
     );
