@@ -59,6 +59,8 @@ const Users = () => {
     const [cities, setCities] = useState([]);
     const [region, setRegion] = useState('');
     const [status, setStatus] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filter, setFilter] = useState(``);
     const [loading, setLoading] = useState(true);
     const [loadingTable, setLoadingTable] = useState(true);
     const [showFilter, setShowFilter] = useState(false);
@@ -69,8 +71,8 @@ const Users = () => {
 
     useEffect(() => {
         getUserStats();
-        getUsers();
         getRegions();
+        getUsers();
     }, []);
 
 
@@ -118,8 +120,9 @@ const Users = () => {
                     setLoadingTable(false);
                     console.log(response, "RESPONSE");
                 })
-                .catch(function (response) {
-                    console.log(response.err);
+                .catch(function (error) {
+                    console.log('Error JSON', error.toJSON());
+                    console.log('Error', error.message);
                 });
     };
 
@@ -137,10 +140,9 @@ const Users = () => {
                 .then(function (response) {
                     setResultStat(response.data);
                     setLoading(false);
-                    console.log(response, "RESPONSE STATS");
                 })
-                .catch(function (response) {
-                    console.log(response.err);
+                .catch(function (error) {
+                    console.log('Error', error.message);
                 });
     };
 
@@ -160,25 +162,32 @@ const Users = () => {
                 setCities(response.data);
                 setLoading(false);
             })
-            .catch(function (response) {
-                console.log(response.err);
+            .catch(function (error) {
+                console.log('Error', error.message);
             });
     };
 
+    // let userCities = Object.values(result).map(item => {
+    //     let cities = item.city;
+    //     return cities;
+    // });
+    // console.log(userCities, "CITIES");
+    
     let regions = Object.values(cities).map(function(item, index) {
-        const options = {index: index, value: item.slug, label: item.name};
+        let options;
+        options = {index: index, value: item.slug, label: item.name};  
+
         return options;
     });
+    // let regions = Object.values(result).map(function(item, index) {
+    //     let options;
+    //     options = {index: index, value: item.login, label: item.city};  
+
+    //     return options;
+    // });
 
     const changeRegionFunc = (region) => {
-        // Object.values(result).forEach(item => {
-        //     if (item.city === region) {
-                setRegion(region);
-            // } else {
-            //     console.log("Такого города у пользователей нет!");
-            // }
-        // })
-        
+        setRegion(region);
     }
 
     const {
@@ -191,7 +200,7 @@ const Users = () => {
         totalPages
     } = usePagination({
         contentPerPage: 15,
-        count: resultTotal,
+        count: resultTotal ?? 0,
     });
 
   const customStyles = {
@@ -249,9 +258,14 @@ const Users = () => {
         setLoadingTable(true);
         getUsers(page);
     }
+    // const clear = () => {
+    //     setShowFilter(!showFilter);
+    //     setLoadingTable(true);
+    //     getUsers();
+    // }
 
-    const {items, requestSort, sortConfig} = useSortableData(Object.values(result));
-  
+    const {items, requestSort, sortConfig} = useSortableData(result == null || result == undefined ? [] : Object.values(result));
+
     return (
         <div className='users_wrapper'>
        {loading ? <LoadingCards /> : <TableCard items={[
@@ -321,13 +335,14 @@ const Users = () => {
                                 </div>
                                 </div>
                                 <div className='filter_button-block'>
+                                    {/* <div className='filter_button-block-btn'>Сбросить изменения</div> */}
                                     <div onClick={refresh} className='filter_button-block-btn'>Применить</div>
                                 </div>
                             </div>
                         : null}</div>
                         </div>
                         <div className='table_input input'>
-                            <input className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
+                            <input onChange={e => {setSearchTerm(e.target.value)}} className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
                             <span className="material-symbols-outlined">search</span>
                         </div>
                     </div>
@@ -414,10 +429,14 @@ const Users = () => {
                     </tr>
                 </thead>
             {loadingTable ? <LoadingSkeletonTable items={[{},{},{},{},{},{}]} /> :
+            <>
+               {result == null || result == undefined ? 
+               <tbody><tr><td className='no-data_table' colSpan={9}><div className='no-data_table-item'><span style={{marginRight: '10px'}} className="material-symbols-outlined">folder_off</span>Нет данных</div></td></tr></tbody>
+               : 
                <tbody>
-                        {/* .slice(firstContentIndex, lastContentIndex) */}
                     {Object
                         .keys(items)
+                        .filter(key => items[key].login.toLowerCase().includes(searchTerm.toLowerCase()))
                         .map((item) => {
                             return (
                                 <tr key={items[item].id} className="table_body">
@@ -474,7 +493,8 @@ const Users = () => {
                                 </tr>
                             )
                         })}
-                </tbody>
+                </tbody>}
+                        </>
                         }
             </table>
 

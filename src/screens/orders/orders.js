@@ -223,7 +223,8 @@ const Orders = () => {
                                         paddingLeft: '10px'
                                     }}
                                         className="table-body_item">
-                                            {items[item].title}
+                                        <a href={items[item].url} target="_blank">
+                                            {items[item].title}</a>
                                         </td>
 
                                     <td

@@ -150,7 +150,7 @@ const Dashboard = () => {
                     localStorage.setItem("dashboardDataFirstDayMonth", JSON.stringify(response.data.activity[timeSpanFirstOfTheMonth]));
                     setLoading(false);
 
-                    console.log(response, "Dashboard");
+                    // console.log(response, "Dashboard");
 
                     // setUsers(response.data.users);
                     // setListings(response.data.listings);
@@ -191,7 +191,7 @@ const Dashboard = () => {
             .then(function (response) {
                 setLoading(false);
                 // setResultStat(response.data)
-                console.log(response.data[timeSpanToday], "TODAY");
+                // console.log(response.data[timeSpanToday], "TODAY");
                 localStorage.setItem("dataDashboardProfitToday", JSON.stringify(response.data[timeSpanToday]));
             })
             .catch(function (response) {
@@ -215,10 +215,10 @@ const Dashboard = () => {
     const dashboardDataToday = JSON.parse(localStorage.getItem("dashboardDataToday"));
     const dashboardDataFirstDayMonth = JSON.parse(localStorage.getItem("dashboardDataFirstDayMonth"));
     const dashboardProfitToday = JSON.parse(localStorage.getItem("dataDashboardProfitToday"));
-    console.log(dashboardProfitToday, "dashboardProfitToday");
-    if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth || dashboardProfitToday === null) {
-        console.log("data is null");
-    };
+    // console.log(dashboardProfitToday, "dashboardProfitToday");
+    // if (dashboardUsers || dashboardListings || dashboardFinances || dashboardDataToday || dashboardDataFirstDayMonth || dashboardProfitToday === null) {
+    //     console.log("data is null");
+    // };
     // DATA FOR LINECHART
     ChartJS.register(
         CategoryScale,
