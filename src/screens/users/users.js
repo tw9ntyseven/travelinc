@@ -59,6 +59,9 @@ const Users = () => {
     const [cities, setCities] = useState([]);
     const [region, setRegion] = useState('');
     const [status, setStatus] = useState('');
+    const [withOrders, setWithOrders] = useState('');
+    const [withListings, setWithListings] = useState('');
+    const [withBookings, setWithBookings] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState(``);
     const [loading, setLoading] = useState(true);
@@ -66,6 +69,7 @@ const Users = () => {
     const [showFilter, setShowFilter] = useState(false);
     const [value, setValue] = useState();
     const [showNotification, setShowNotification] = useState(false);
+    const [statusOrders, setStatusOrders] = useState('');
 
 
 
@@ -78,29 +82,63 @@ const Users = () => {
 
     
     const getUsers = (page) => {
-        let filter, filtersRegion, filtersStatus;
+        let filter, filterRes;
 
         if (region != '' && status == '') {
-            filtersRegion = `"region": "${region}"`
-            filtersRegion = filtersRegion.replace(/[`]+/g, '');
-            filter = `{${filtersRegion}}`
+            filterRes = `{"region": "${region}"}`
         }
         if (region == '' && status != '') {
-            filtersStatus = `"status": "${status}"`
-            filtersStatus = filtersStatus.replace(/[`]+/g, '');
-            filter = `{${filtersStatus}}`
+            filterRes = `{"status": "${status}"}`
         }
         if (region != '' && status != '') {
-            filtersRegion = `"region": "${region}"`
-            filtersRegion = filtersRegion.replace(/[`]+/g, '');
-            console.log(filtersRegion, 'filtersRegion');
-
-            filtersStatus = `"status": "${status}"`
-            filtersStatus = filtersStatus.replace(/[`]+/g, '');
-            console.log(filtersStatus, 'filtersStatus');
-            filter = `{${filtersRegion}, ${filtersStatus}}`
+            filterRes = `{"region": "${region}", "status": "${status}"}`
         }
 
+        // ORDERS
+        if (withOrders != '') {
+            filterRes = `{"orders": "${withOrders}"}`
+        }
+        if (withOrders != '' && region != '') {
+            filterRes  = `{"region": "${region}", "orders": "${withOrders}"}`
+        }
+        if (withOrders != '' && status != '') {
+            filterRes  = `{"status": "${status}", "orders": "${withOrders}"}`
+        }
+        if (withOrders != '' && region != '' && status != '') {
+            filterRes  = `{"region": "${region}", "orders": "${withOrders}", "status": "${status}"}`
+        }
+        // BOOKINGS
+        if (withBookings != '') {
+            filterRes = `{"bookings": "${withBookings}"}`
+        }
+        if (withBookings != '' && region != '') {
+            filterRes = `{"region": "${region}", "bookings": "${withBookings}"}`
+        }
+        if (withBookings != '' && status != '') {
+            filterRes = `{"status": "${status}", "bookings": "${withBookings}"}`
+        }
+        if (withBookings != '' && region != '' && status != '') {
+            filterRes = `{"region": "${region}", "bookings": "${withBookings}", "status": "${status}"}`
+        }
+        // LISTINGS
+        if (withListings != '') {
+            filterRes = `{"listings": "${withListings}"}`
+        }
+        if (withListings != '' && region != '') {
+            filterRes = `{"region": "${region}", "listings": "${withListings}"}`
+        }
+        if (withListings != '' && status != '') {
+            filterRes = `{"status": "${status}", "listings": "${withListings}"}`
+        }
+        if (withListings != '' && region != '' && status != '') {
+            filterRes = `{"region": "${region}", "listings": "${withListings}", "status": "${status}"}`
+        }
+        if (filterRes) {
+            filterRes = filterRes.replace(/[`]+/g, '');
+            filter = filterRes;
+            console.log(filter, 'filter 3');
+        }
+        
             axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -243,9 +281,42 @@ const Users = () => {
           setStatus("not_confirmed");
         }, [''],
       )
+      const checkBoxWithOrders = useCallback(
+        (e) => {
+          setWithOrders("with");
+          setStatusOrders("with-orders");
+        }, [''],
+      )
+      const checkBoxWithListings = useCallback(
+        (e) => {
+          setWithListings("with");
+          setStatusOrders("with-listings");
+        }, [''],
+      )
+      const checkBoxWithBookings = useCallback(
+        (e) => {
+          setWithBookings("with");
+          setStatusOrders("with-bookings");
+        }, [''],
+      )
+      const checkBoxWithoutOrders = useCallback(
+        (e) => {
+          setWithOrders("without");
+          setStatusOrders("without-orders");
+        }, [''],
+      )
+
+      const clear = () => {
+          changeRegionFunc('');
+        //   setRegion('');
+          setStatus('');
+          setShowFilter(!showFilter);
+        //   setLoadingTable(true);
+          getUsers();
+    }
 
     const refresh = () => {
-        if (region == '' && status == '') {
+        if (region == '' && status == '' && withOrders == '' && withListings == '' && withBookings == '') {
             alert("Установите фильтры!");
             // setShowNotification(!showNotification);
         } else {
@@ -258,11 +329,7 @@ const Users = () => {
         setLoadingTable(true);
         getUsers(page);
     }
-    // const clear = () => {
-    //     setShowFilter(!showFilter);
-    //     setLoadingTable(true);
-    //     getUsers();
-    // }
+
 
     const {items, requestSort, sortConfig} = useSortableData(result == null || result == undefined ? [] : Object.values(result));
 
@@ -326,23 +393,23 @@ const Users = () => {
                                     <Checkbox checked={status == "confirmed" ? true : false} onChange={checkBoxConfirmed} className="filter_checkbox-column-item" label="Подтвержденные" />
                                     <Checkbox checked={status == "not_confirmed" ? true : false} onChange={checkBoxNotConfirmed} className="filter_checkbox-column-item" label="Не подтвержденные" />
                                     <Checkbox checked={status == "on_validation" ? true : false} onChange={checkBoxOnValidation} className="filter_checkbox-column-item" label="На проверке" />
-                                    <Checkbox className="filter_checkbox-column-item" label="С объявлениями" />
+                                    <Checkbox checked={statusOrders == "with-orders" ? true : false} onChange={checkBoxWithOrders} className="filter_checkbox-column-item" label="С объявлениями" />
                                 </div>
                                 <div className='filter_checkbox-column'>
-                                    <Checkbox className="filter_checkbox-column-item" label="Без объявлений" />
-                                    <Checkbox className="filter_checkbox-column-item" label="С заказами" />
-                                    <Checkbox className="filter_checkbox-column-item" label="С бронями" />
+                                    <Checkbox checked={statusOrders == "without-orders" ? true : false} onChange={checkBoxWithoutOrders} className="filter_checkbox-column-item" label="Без объявлений" />
+                                    <Checkbox checked={statusOrders == "with-listings" ? true : false} onChange={checkBoxWithListings} className="filter_checkbox-column-item" label="С заказами" />
+                                    <Checkbox checked={statusOrders == "with-bookings" ? true : false} onChange={checkBoxWithBookings} className="filter_checkbox-column-item" label="С бронями" />
                                 </div>
                                 </div>
                                 <div className='filter_button-block'>
-                                    {/* <div className='filter_button-block-btn'>Сбросить изменения</div> */}
+                                    <div onClick={clear} className='filter_button-block-btn filter_button-block-btn--reset'>Сбросить изменения</div>
                                     <div onClick={refresh} className='filter_button-block-btn'>Применить</div>
                                 </div>
                             </div>
                         : null}</div>
                         </div>
                         <div className='table_input input'>
-                            <input onChange={e => {setSearchTerm(e.target.value)}} className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
+                            <input onChange={e => {setSearchTerm(e.target.value)}} className='input_text' placeholder='Поиск по имени, логину, номеру или городу'/>
                             <span className="material-symbols-outlined">search</span>
                         </div>
                     </div>
@@ -434,9 +501,16 @@ const Users = () => {
                <tbody><tr><td className='no-data_table' colSpan={9}><div className='no-data_table-item'><span style={{marginRight: '10px'}} className="material-symbols-outlined">folder_off</span>Нет данных</div></td></tr></tbody>
                : 
                <tbody>
+               {/* items[key].login.toLowerCase().includes(searchTerm.toLowerCase()) */}
                     {Object
                         .keys(items)
-                        .filter(key => items[key].login.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .filter(key => (
+                            items[key].login.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].city.toLowerCase().includes(searchTerm.toLowerCase())
+                            ))
                         .map((item) => {
                             return (
                                 <tr key={items[item].id} className="table_body">

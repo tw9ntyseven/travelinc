@@ -23,8 +23,8 @@
 }
 .filter_button-block {
     display: flex;
-    justify-content: end;
-    margin: 0px 0px 10px 0;
+    justify-content: space-between;
+    margin: 7px 0px 17px 0;
 }
 .filter_button-block-btn  {
     padding: 9px 15px;
@@ -33,6 +33,12 @@
     color: #fff;
     border-radius: 8px;
     cursor: pointer;
+}
+.filter_button-block-btn--reset {
+    background-color: inherit;
+    border: 1px solid #2097F5;
+    color: #2097F5;
+    font-weight: 400;
 }
 
 .filter-orders {
