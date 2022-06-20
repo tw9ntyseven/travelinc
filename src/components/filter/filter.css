@@ -43,6 +43,7 @@
 
 .filter-orders {
     display: flex;
+    flex-direction: column;
     right: 150px;
 }
 .filter_block {

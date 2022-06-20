@@ -3,10 +3,10 @@ import './notification.css';
 
 export const Notification = () => {
     return (
-        <div class="container">
-            <div class="rectangle">
-                <div class="notification-text">
-                    <i class="material-icons">info</i>
+        <div className="container">
+            <div className="rectangle">
+                <div className="notification-text">
+                    <i className="material-icons">info</i>
                     <span>&nbsp;&nbsp;This is a test notification.</span>
                 </div>
             </div>

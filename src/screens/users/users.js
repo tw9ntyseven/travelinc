@@ -107,6 +107,7 @@ const Users = () => {
         if (withOrders != '' && region != '' && status != '') {
             filterRes  = `{"region": "${region}", "orders": "${withOrders}", "status": "${status}"}`
         }
+
         // BOOKINGS
         if (withBookings != '') {
             filterRes = `{"bookings": "${withBookings}"}`
@@ -120,6 +121,7 @@ const Users = () => {
         if (withBookings != '' && region != '' && status != '') {
             filterRes = `{"region": "${region}", "bookings": "${withBookings}", "status": "${status}"}`
         }
+
         // LISTINGS
         if (withListings != '') {
             filterRes = `{"listings": "${withListings}"}`
@@ -214,7 +216,6 @@ const Users = () => {
     let regions = Object.values(cities).map(function(item, index) {
         let options;
         options = {index: index, value: item.slug, label: item.name};  
-
         return options;
     });
     // let regions = Object.values(result).map(function(item, index) {
@@ -329,7 +330,6 @@ const Users = () => {
         setLoadingTable(true);
         getUsers(page);
     }
-
 
     const {items, requestSort, sortConfig} = useSortableData(result == null || result == undefined ? [] : Object.values(result));
 
@@ -495,13 +495,12 @@ const Users = () => {
                         </th>
                     </tr>
                 </thead>
-            {loadingTable ? <LoadingSkeletonTable items={[{},{},{},{},{},{}]} /> :
+            {loadingTable ? <LoadingSkeletonTable items={[{},{},{},{},{},{}]} /> 
+            :
             <>
-               {result == null || result == undefined ? 
-               <tbody><tr><td className='no-data_table' colSpan={9}><div className='no-data_table-item'><span style={{marginRight: '10px'}} className="material-symbols-outlined">folder_off</span>Нет данных</div></td></tr></tbody>
+               {result == null || result == undefined ? <tbody><tr><td className='no-data_table' colSpan={9}><div className='no-data_table-item'><span style={{marginRight: '10px'}} className="material-symbols-outlined">folder_off</span>Нет данных</div></td></tr></tbody>
                : 
                <tbody>
-               {/* items[key].login.toLowerCase().includes(searchTerm.toLowerCase()) */}
                     {Object
                         .keys(items)
                         .filter(key => (
@@ -567,11 +566,10 @@ const Users = () => {
                                 </tr>
                             )
                         })}
-                </tbody>}
-                        </>
-                        }
+                    </tbody>}
+                </>
+            }
             </table>
-
             <div className="pagination">
                 <p className="pagination_text">
                     {page} из {totalPages}

@@ -1,11 +1,16 @@
 import React, {useState, useEffect} from 'react'
-import './orders.css'
 import Filter, { FilterOrders } from '../../components/filter/filter';
 import usePagination from "../../hooks/usePagination";
 import { thousandSeparator } from '../dashboard/dashboard';
 import { useSortableData } from '../users/users';
+import DatePicker, { registerLocale } from "react-datepicker";
+import Select from 'react-select'
 import { LoadingCards, LoadingSkeletonTableOrders } from '../../components/loading-skeleton/loading-skeleton';
 import { TableCard } from '../../components/table/table';
+import ru from "date-fns/locale/ru"; // the locale you want
+import './orders.css'
+import "react-datepicker/dist/react-datepicker.css";
+registerLocale("ru", ru);
 
 const axios = require('axios').default;
 
@@ -13,6 +18,11 @@ const Orders = () => {
     const [result, setResult] = useState([]);
     const [resultStat, setResultStat] = useState([]);
     const [resultTotal, setResultTotal] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [region, setRegion] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
     const [showFilter, setShowFilter] = useState(false);
     const [loading, setLoading] = useState(true);
     const [loadingStats, setLoadingStats] = useState(true);
@@ -20,9 +30,21 @@ const Orders = () => {
     useEffect(() => {
         getOrders();
         getOrdersStat();
+        getRegions();
     }, []);
 
     const getOrders = (page) => {
+        let filter, filterRes;
+
+        if (region != '') {
+            filterRes = `{"region": "${region}"}`
+        }
+
+        if (filterRes) {
+            filterRes = filterRes.replace(/[`]+/g, '');
+            filter = filterRes;
+        }
+
             axios({
                 method: "POST",
                 url: "https://easytake.org/custom.php",
@@ -30,16 +52,17 @@ const Orders = () => {
                     type: 'get_dashboard_orders_list',
                     per_page: 50,
                     page: page ? page : 1,
+                    filters: filter,
+                    // filters: {
+                    //     region: "151",
+                    //     status: "paid",
+                    //     date: {
+                    //         "start_date": "2022-05-22",
+                    //         "end_date": "2022-05-27"
+                    //     }
+                    // },
                 
                 },
-                // filters: {
-                //     region: "151",
-                //     status: "paid",
-                //     date: {
-                //         "start_date": "2022-05-22",
-                //         "end_date": "2022-05-27"
-                //     }
-                // },
                 headers: {
                     "Content-Type": "multipart/form-data"
                 }
@@ -73,7 +96,6 @@ const Orders = () => {
             .then(function (response) {
                 setResultStat(response.data);
                 setLoadingStats(false);
-                console.log(response.data, "ORDERS Stat");
             })
             .catch(function (response) {
                 console.log(response.err);
@@ -81,9 +103,37 @@ const Orders = () => {
 
 };
 
-    const {items, requestSort, sortConfig} = useSortableData(result);
+const getRegions = () => {
+    axios({
+        method: "POST",
+        url: "https://easytake.org/custom.php",
+        data:{
+            type: "get_regions"
+        },
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+        })
+        .then(function (response) {
+            console.log(response.data, "CITIES");
+            setCities(response.data);
+            setLoadingStats(false);
+        })
+        .catch(function (error) {
+            console.log('Error', error.message);
+        });
+};
 
-    const {
+    let regions = Object.values(cities).map(function(item, index) {
+        const options = {index: index, value: item.term_id, label: item.name};
+        return options;
+      });
+
+      const changeRegionFunc = (region) => {
+        setRegion(region);
+    }
+
+      const {
         firstContentIndex,
         lastContentIndex,
         nextPage,
@@ -93,13 +143,57 @@ const Orders = () => {
         totalPages
     } = usePagination({
         contentPerPage: 50,
-        count: resultTotal
+        count: resultTotal ?? 0
     });
+
+
+    const customStyles = {
+        option: (provided, state) => ({
+          ...provided,
+          margin: '4px 0px',
+          padding: 5,
+        //   color: '#000',
+          color: state.isSelected ? 'white' : 'black',
+          backgroungColor: state.isSelected ? 'blue' :'#B1DBFB',
+          borderRadius: '8px',
+        }),
+        control: () => ({
+          display: 'flex',
+          width: 345,
+          color: '#000',
+          border: '1px solid #C4C4C4',
+          borderRadius: '8px'
+        }),
+        dropdownIndicator: (provided, state) => ({
+            ...provided,
+            color: '#000',
+            transform: state.selectProps.menuIsOpen ? 'rotate(180deg)': '',
+        })
+      }
+
+    const clear = () => {
+        setShowFilter(!showFilter);
+        getOrders();
+    }
+
+    const refresh = () => {
+        if (region == '') {
+            alert("Установите фильтры!");
+        } else {
+            setShowFilter(!showFilter);
+            setLoading(true);
+            getOrders();
+        }
+    }
+
 
     const pagino = (page) => {
         setLoading(true);
         getOrders(page);
     }
+
+    const {items, requestSort, sortConfig} = useSortableData(result == null || result == undefined ? [] : Object.values(result));
+
 
     return (
         <div className='orders_wrapper'>
@@ -145,10 +239,60 @@ const Orders = () => {
                             <div className='filter_counter'>0</div>
                             <span className="material-symbols-outlined">tune</span>
                         </div>
-                        <div>{showFilter ? <FilterOrders /> : null}</div>
+                        <div>{showFilter ? 
+                            <div className="filter filter-orders">
+                            <div className='flex'>
+                            <div style={{marginRight: '20px'}} className="filter_block">
+                                <Select
+                                    placeholder="Город"
+                                    components={{ IndicatorSeparator:() => null }}
+                                    options={regions}
+                                    onChange={e => changeRegionFunc(e.value)}
+                                    styles={customStyles}
+                                />
+                                <DatePicker
+                                    locale={ru}
+                                    selectsRange={true}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onChange={(update) => {
+                                        setDateRange(update);
+                                    }}
+                                    className='filter_date'
+                                    // isClearable={true}
+                                />
+                                {/* <input className='filter_date' type="date" placeholder='date now' /> */}
+                                <Select
+                                    placeholder="Самые новые"
+                                    components={{ IndicatorSeparator:() => null }}
+                                    options={result}
+                                    styles={customStyles}
+                                />
+                            </div>
+                            <div className="filter_block">
+                                <Select
+                                    placeholder="Жилье"
+                                    components={{ IndicatorSeparator:() => null }}
+                                    options={result}
+                                    styles={customStyles}
+                                />
+                                <Select
+                                    placeholder="Оплачено"
+                                    components={{ IndicatorSeparator:() => null }}
+                                    options={result}
+                                    styles={customStyles}
+                                />
+                            </div>
+                            </div>
+                            <div style={{justifyContent: 'end'}} className='filter_button-block'>
+                                    <div style={{marginRight: '10px'}} onClick={clear} className='filter_button-block-btn filter_button-block-btn--reset'>Сбросить изменения</div>
+                                    <div onClick={refresh} className='filter_button-block-btn'>Применить</div>
+                                </div>
+                            </div>
+                         : null}</div>
                         </div>
                         <div className='table_input input'>
-                            <input className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
+                            <input onChange={e => {setSearchTerm(e.target.value)}} className='input_text' placeholder='Поиск по имени, номеру или эл...'/>
                             <span className="material-symbols-outlined">search</span>
                         </div>
                     </div>
@@ -210,10 +354,21 @@ const Orders = () => {
                         </th>
                     </tr>
                 </thead>
-              {loading ? <LoadingSkeletonTableOrders items={[{},{},{},{},{},{}]} /> : <tbody>
-                    {/* .slice(firstContentIndex, lastContentIndex) */}
+              {loading ? <LoadingSkeletonTableOrders items={[{},{},{},{},{},{}]} /> 
+              :
+              <>
+              {result == null || result == undefined ? <tbody><tr><td className='no-data_table' colSpan={9}><div className='no-data_table-item'><span style={{marginRight: '10px'}} className="material-symbols-outlined">folder_off</span>Нет данных</div></td></tr></tbody>
+              : 
+               <tbody>
+                            {/* items[key].booking_author_last_name.toLowerCase().includes(searchTerm.toLowerCase()) || */}
                     {Object
                         .keys(items)
+                        .filter(key => (
+                            items[key].booking_author_login.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].booking_author_first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].booking_author_last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            items[key].booking_author_phone.toLowerCase().includes(searchTerm.toLowerCase())
+                            ))
                         .map((item) => {
                             return (
                                 <tr key={items[item].id} className="table_body">
@@ -273,8 +428,10 @@ const Orders = () => {
                                     }} className="table-body_item no-data">Город не указан</td>}
                                 </tr>
                             )
-                        })}
-                </tbody>}
+                        })}    
+              </tbody>}
+            </>
+            }
             </table>
             <div className="pagination">
                 <p className="pagination_text">

@@ -151,7 +151,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Логин
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -161,7 +161,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Имя пользователя
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -171,7 +171,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Телефон
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -181,7 +181,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Статус
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -191,7 +191,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Заказы
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -201,7 +201,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Брони
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -211,7 +211,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Акт. объ.
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -221,7 +221,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Город
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
             <th>
@@ -231,7 +231,7 @@ function AppPagino() {
                 className='table_title'
               >
                 Рейтинг
-                <span class="material-symbols-outlined">arrow_drop_down</span>
+                <span className="material-symbols-outlined">arrow_drop_down</span>
               </button>
             </th>
           </tr>
@@ -247,13 +247,13 @@ function AppPagino() {
                   {(() => {
                     switch(item.status) {
                       case 'confirmed':
-                        return <span style={{color: '#4CBB17'}} class="material-symbols-outlined">check_circle</span>;
+                        return <span style={{color: '#4CBB17'}} className="material-symbols-outlined">check_circle</span>;
                       case 'notСonfirmed':
-                        return <span style={{color: '#F05050'}} class="material-symbols-outlined">cancel</span>;
+                        return <span style={{color: '#F05050'}} className="material-symbols-outlined">cancel</span>;
                       case 'waitingConfirmed':
-                        return <span style={{color: '#FFBF00'}} class="material-symbols-outlined">timelapse</span>;
+                        return <span style={{color: '#FFBF00'}} className="material-symbols-outlined">timelapse</span>;
                       case 'blocked':
-                        return <span style={{color: '#666669'}} class="material-symbols-outlined">lock</span>;
+                        return <span style={{color: '#666669'}} className="material-symbols-outlined">lock</span>;
                     } 
                   })()}
                   {/* {item.status === 'accept' ? <span style={{color: '#4CBB17'}} class="material-symbols-outlined">check_circle</span> : <span style={{color: '#F05050'}} class="material-symbols-outlined">cancel</span>}  */}
